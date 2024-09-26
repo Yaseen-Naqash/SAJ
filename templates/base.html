@@ -1,0 +1,49 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}My Website{% endblock %}</title>
+    {% load static %}
+    <!-- Global CSS (like your base styles) -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    <!-- Additional CSS for individual pages can be added here -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Navbar -->
+    <header>
+        <nav>
+            <ul>
+                <li><a href="">Home</a></li>
+                <li><a href="">About</a></li>
+                <li><a href="">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main content area -->
+    <main>
+        {% block content %}
+        <!-- Default content if no block is defined -->
+        <p>Welcome to my website!</p>
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2024 My Website. All rights reserved.</p>
+    </footer>
+
+
+    <!-- Additional JS for individual pages can be added here -->
+    {% block extra_js %}{% endblock %}
+    <!-- Global JS (like common scripts) -->
+    <script src="{% static 'js/base.js' %}"></script>
+
+    
+
+</body>
+</html>

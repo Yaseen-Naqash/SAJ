@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from a_institution_management.models import Branch, Institution
+
 # Create your models here.
 
 
@@ -47,9 +48,18 @@ class Teacher(Person):
         return f"Teacher: {self.first_name} {self.last_name} at {self.branch.name}"
     
 
+
+
+class Grade(models.Model):
+    title = models.CharField(max_length=127, null=True)
+    
+    def __str__(self):
+        return f'grade : {self.title}'
+
 class Student(Person):
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name='students', null=True)
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='students', null=True)
+    grade = models.ForeignKey(Grade,on_delete=models.CASCADE, related_name='students', null=True)
 
     def __str__(self):
         return f"Student: {self.first_name} {self.last_name} at {self.branch.name}"

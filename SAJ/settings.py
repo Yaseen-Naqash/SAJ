@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'a_institution_management',
     'a_user_management',
+    'a_course_management',
 ]
 
 MIDDLEWARE = [
@@ -57,7 +58,7 @@ ROOT_URLCONF = 'SAJ.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -118,7 +119,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+
+# URL prefix for static files
+STATIC_URL = '/static/'
+
+# Additional locations of static files (project-wide static folder)
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',  # This tells Django to look in the 'static/' directory in your root project folder
+]
+
+# Location where collected static files will be stored for production (run 'collectstatic' to populate this)
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # This is where Django will collect all static files for deployment
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
