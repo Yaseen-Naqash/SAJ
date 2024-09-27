@@ -1,21 +1,53 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8" dir="rtl">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAJ | ورود</title>
+    {% load static %}
 
-{% block title %}
-    SAJ | ورود دانشجو
-{% endblock %}
-
-
-{% block extra_css %}
-    <style></style>
-{% endblock %}
-
-
-{% block content %}
-    <h1>Welcome to the Home Page!</h1>
-    <p>This is the home page content that is unique to this view.</p>
-{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
 
-{% block extra_js %}
-    <script></script>
-{% endblock %}
+    
+</head>
+<body>
+    <div class="box">
+        <h2>خانه برنامه نویسان اهواز</h2>
+        {% if login_method == 'student' %}
+            <h3>صفحه ورود دانشجو </h3>
+        {% elif login_method == 'teacher' %}
+            <h3>صفحه ورود استاد </h3>
+        {% else %}
+            <h3>خطا</h3>
+        {% endif %}
+
+        <form>
+          <div class="user-box">
+            <input type="text" name="username" required>
+            <label>شماره تلفن</label>
+          </div>
+          <div class="user-box">
+            <input type="password" name="password" required>
+            <label>رمز عبور</label>
+          </div>
+          <div class="buttons">
+            <a href="{% url 'register_url' %}" class="button">ثبت نام</a>
+            <button class="button" type="submit">ورود</button>
+            
+          </div>
+        </form>
+
+        {% if login_method == 'student' %}
+        <p>.برای ورود به پنل اساتید <a href="{% url 'teacher_login_url' %}" style="color: #6c6efd;">اینجا</a> کلیک کنید</p>
+        {% elif login_method == 'teacher' %}
+        <p>.برای ورود به پنل دانشجو <a href="{% url 'student_login_url' %}" style="color: #6c6efd;">اینجا</a> کلیک کنید</p>
+
+        {% else %}
+        <h3>  خطا </h3>
+
+        {% endif %}
+
+    </div>
+</body>
+</html>

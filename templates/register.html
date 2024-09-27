@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8" dir="rtl">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAJ | ورود</title>
+    {% load static %}
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+
+    
+</head>
+<body>
+    <div class="box">
+        <h2>خانه برنامه نویسان اهواز</h2>
+        
+        
+        <h3> ثبت نام</h3>
+        
+
+        <form>
+          <div class="user-box">
+            <input type="text" name="username" required dir="rtl">
+            <label>نام </label>
+          </div>
+          <div class="user-box">
+            <input type="text" name="username" required>
+            <label> نام خانوادگی</label>
+          </div>
+          <div class="user-box">
+            <input type="password" name="password" required>
+            <label>رمز عبور</label>
+          </div>
+          <div class="user-box">
+            <input type="password" name="password" required>
+            <label>تکرار رمز عبور</label>
+          </div>
+          <div class="user-box">
+            <input type="text" id="phone_number" name="phone_number" required>
+            <label>شماره تلفن</label>
+          </div>
+          <button class="button" type="button" id="send-code-btn"> ارسال کد</button>
+          <div class="user-box">
+            <input type="text" name="password" required>
+            <label> کد 4 رقمی</label>
+          </div>
+          <div class="buttons">
+            <button class="button" type="submit">ثبت نام</button>
+            
+          </div>
+        </form>
+
+        
+        <p>.برای ورود به پنل دانشجو <a href="{% url 'student_login_url' %}" style="color: #6c6efd;">اینجا</a> کلیک کنید</p>
+
+        
+
+    </div>
+    <script>
+      document.getElementById('send-code-btn').addEventListener('click', function(event) {
+          event.preventDefault(); // Prevent form submission
+      
+          var phoneNumber = document.getElementById('phone_number').value;
+          var sendCodeButton = document.getElementById('send-code-btn');
+      
+          // Send the request to Django backend
+          fetch('/send-code/', {  // Change this to your Django URL
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': '{{ csrf_token }}'  // Ensure CSRF token is passed
+              },
+              body: JSON.stringify({
+                  phone_number: phoneNumber
+              })
+          })
+          .then(response => response.json())
+          .then(data => {
+              // Handle the response data
+              if (data.success) {
+                  alert('Code sent successfully!');
+                  // Start the countdown timer after a successful code send
+                  startCountdown(sendCodeButton, 120);  // 120 seconds = 2 minutes
+              } else {
+                  alert('Failed to send code.');
+              }
+          })
+          .catch(error => {
+              console.error('Error:', error);
+          });
+      });
+      
+      // Function to start the countdown
+      function startCountdown(button, seconds) {
+          button.disabled = true;  // Disable the button
+          var originalText = button.textContent;  // Store the original button text
+          var timerInterval = setInterval(function() {
+              if (seconds > 0) {
+                  button.textContent = `ارسال کد (${seconds}s)`;  // Update the button text with countdown
+                  seconds--;
+              } else {
+                  clearInterval(timerInterval);
+                  button.disabled = false;  // Re-enable the button after the countdown
+                  button.textContent = originalText;  // Restore the original button text
+              }
+          }, 1000);  // Run the interval every second
+      }
+      </script>
+</body>
+</html>

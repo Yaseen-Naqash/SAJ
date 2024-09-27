@@ -5,7 +5,7 @@ from a_user_management.models import Teacher, Student
 class Course(models.Model):
     title = models.CharField(max_length=255, null=True)
     description = models.TextField(max_length=2047, null=True)
-
+    students = models.ManyToManyField(Student, related_name='courses')
     teachers = models.ManyToManyField(Teacher, related_name='courses')
     prerequisites = models.ManyToManyField('Course', related_name='required_for') # math101.required_for.all()  # Returns [math102]
     course_img = models.ImageField(upload_to='Course_images/', null=True, blank=True)

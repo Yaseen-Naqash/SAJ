@@ -200,7 +200,6 @@ __pycache__/
 
 
 # Static and media files
-static/
 media/
 
 # Docker
