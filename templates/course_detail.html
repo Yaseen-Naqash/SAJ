@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Home - My Website
+{% endblock %}
+{% load static %}
+
+
+{% block extra_css %}
+    <style></style>
+{% endblock %}
+
+
+{% block content %}
+    <div class="course-detail">
+        {% if course.course_img %}
+            <img src="{{ course.course_img.url }}" alt="{{ course.title }}">
+        {% else %}
+            <img src="{% static 'default_course_image.jpg' %}" alt="{{ course.title }}">
+        {% endif %}
+        
+        <h1>{{ course.title }}</h1>
+        <p>{{ course.description|default:"No description available" }}</p>
+        
+        <p>وضعیت: 
+            {% if course.course_status == '1' %}
+                در حال ثبت نام
+            {% else %}
+                اتمام مهلت ثبت نام
+            {% endif %}
+        </p>
+        
+    </div>
+{% endblock %}
+
+
+{% block extra_js %}
+    <script></script>
+{% endblock %}

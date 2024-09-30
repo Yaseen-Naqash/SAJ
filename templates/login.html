@@ -7,11 +7,21 @@
     {% load static %}
 
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="icon" href="../media/education_graduate_college_university_cap_graduation_icon_262277.ico" type="image/x-icon">
 
 
     
 </head>
 <body>
+  {% if messages %}
+      <div class="messages" id="messages">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            <h3 style="margin: 0 auto;">{{ message }}</h3>
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
     <div class="box">
         <h2>خانه برنامه نویسان اهواز</h2>
         {% if login_method == 'student' %}
@@ -22,7 +32,8 @@
             <h3>خطا</h3>
         {% endif %}
 
-        <form>
+        <form method="POST" action="">
+          {% csrf_token %}
           <div class="user-box">
             <input type="text" name="username" required>
             <label>شماره تلفن</label>
@@ -49,5 +60,7 @@
         {% endif %}
 
     </div>
+    <script src="{% static 'js/base.js' %}"></script>
+
 </body>
 </html>

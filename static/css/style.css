@@ -7,20 +7,23 @@
 html, body {
     margin: 0;
     width: 100%;
-    color: var(--secondary);
+    color: var(--primary);
     font-family: var(--font-main);
-    background-image: url(../../media/background.png);
+    background-image: url(../media/background.png);
     background-size: auto;  /* Ensures the image covers the whole area without overflow */
     background-position: center;
     -webkit-font-smoothing: antialiased;
     scroll-behavior: smooth;
     box-sizing: border-box;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+}
+body::-webkit-scrollbar {
+    display: none;
 }
 
-
 main {
-    padding-right: 150px;
-    margin: 0 0 0 5em;
+    margin: 0 90px 0 0;
     min-height: 150vh;
 }
 a {  
@@ -125,6 +128,14 @@ ul, ol {
     overflow-y: auto;
     overflow-x: hidden;
     color: var(--primary);
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;
+    z-index: 100;
+    box-shadow: 0 15px 25px rgba(0,0,0,1);
+
+}
+#navbar::-webkit-scrollbar {
+    display: none;
 }
 #navbar:hover {
     width: 16em;
@@ -177,7 +188,7 @@ ul, ol {
     transition: all .5s cubic-bezier(var(--transition-main), 1);
 }
 .navbar-item-inner:hover {
-    color: var(--secondary);
+    color: var(--primary);
     background: var(--accent);
     box-shadow: 0 17px 30px -10px hsla(var(--black), .25);
 }
@@ -186,10 +197,12 @@ ul, ol {
     position: relative;
 }
 .navbar-item-inner-icon-wrapper ion-icon {
+    color: var(--primary);
     position: absolute;
     font-size: calc(var(--navbar-buttons) - 1rem);
 }
 .link-text {
+    font-size: 20px;
     margin: 0;
     width: 0;
     text-overflow: ellipsis;
@@ -202,13 +215,25 @@ ul, ol {
     width: calc(100% - calc(5rem - 8px));
     opacity: 1;
 }
+.small-profile{
+    margin-right: 7px;
+    width: 35px;
+    height: 35px;
+    border-radius: 50px;
+    border: 2px solid var(--accent);
+}
+.icon {
+    margin-right: 7px;
+    width: 32px;  /* Adjust the size of the icon */
+    height: 32px;
+    background-size: contain; /* Ensures the icon fits within the width and height */
+    background-repeat: no-repeat; /* Prevents the background from repeating */
+    display: inline-block; /* Allows the icon to sit inline with text */
+    vertical-align: middle; /* Aligns the icon vertically in line with text */
+  }
+  
 
-/* ======
-    Main
-   ====== */
-
-
-
+  
 
 /* Scrollbar */
 ::-webkit-scrollbar-track {
@@ -288,7 +313,7 @@ ul, ol {
 /* WINDOWS */
 
 .box {
-    margin: 50px auto;
+    margin: 100px auto;
     
 
     width: 100%;
@@ -321,12 +346,35 @@ ul, ol {
     text-align: center;
   }
   
-  .box .user-box {
+
+  .filter-box{
+    width: 80%;
+    background-color: var(--secondary);
+    height: 90px;
+    margin: 25px auto;
+    border-radius: 20px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+    gap: 20px;
+  }
+  .filter-box .button{
+    width: 100px;
+  }
+  
+
+
+
+/* FIELDS */
+.user-box {
     width: 100%;
     position: relative;
   }
   
-  .box .user-box input {
+.user-box input {
     width: 100%;
     padding: 10px 0;
     font-size: 16px;
@@ -336,7 +384,7 @@ ul, ol {
     outline: none;
     background: transparent;
   }
-  .box .user-box label {
+.user-box label {
     position: absolute;
     top:0;
     right: 0;
@@ -348,8 +396,8 @@ ul, ol {
     transition: .5s;
   }
   
-  .box .user-box input:focus ~ label,
-  .box .user-box input:valid ~ label {
+.user-box input:focus ~ label,
+.user-box input:valid ~ label {
     top: -10px;
     right: 10px;
     background-color: var(--secondary);
@@ -357,14 +405,6 @@ ul, ol {
     padding: 0 5px;
     font-size: 14px;
   }
-  
-  
-  
-
-/* MESSAGES */
-
-/* FIELDS */
-
 /* BUTTONS */
 .button{
     background-color: var(--accent);
@@ -376,9 +416,15 @@ ul, ol {
     font-size: 16px;
     padding: 10px;
     cursor: pointer;
+    transition: all .5s cubic-bezier(var(--transition-main), 1);
 
     
-}.box a,p{
+}
+.button:hover{
+    color: var(--secondary);
+    background-color: var(--primary);
+}
+.box a,p{
     text-align: center;
     color: var(--primary);
 }
@@ -394,6 +440,130 @@ ul, ol {
     align-items: center;
     width: 100%;
 }
-/* DASHBOARD */
 
 /* CARDS */
+.courses-wrapper{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+}
+.course{
+    width: 320px;
+    height: 400px;
+    background-color: var(--secondary);
+    border-radius: 25px;
+    box-shadow: 0 15px 25px rgba(0,0,0,.6);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: start;
+    
+}
+.course img{
+    width: 100%;
+    margin: 0 auto;
+    height: 150px;
+    object-fit: fill;
+}
+.course h1{
+    width: 100%;
+    text-align: center;
+    font-size: 18px;
+}
+.course p{
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
+    padding: 0 15px;
+    overflow: hidden;             /* Hide the overflowed text */
+    display: -webkit-box;         /* Use WebKit's box model */
+    -webkit-line-clamp: 3;        /* Limit to 3 lines (you can change this) */
+    -webkit-box-orient: vertical; /* Set the orientation to vertical */
+    white-space: normal;  
+}
+.course .button{
+    width: 100px;
+    text-align: center;
+    margin-top: auto;
+    margin-bottom: 10px;
+}
+
+/* MESSAGES */
+/* General alert style */
+.messages{
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+
+
+}
+.alert {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 40%;
+    padding: 25px;
+    border-radius: 12px;
+  }
+  
+  .message-btn-close{
+    padding: 11px 15px;
+    border-radius: 100px;
+    border: none;
+    
+  }
+  /* Success message */
+  .alert-success {
+    color: #3c763d;
+    background-color: #b7ff9a;
+    
+  }
+  .alert-success .message-btn-close{
+    background-color: #3c763d;
+    color: white;
+  }
+  
+  /* Error message */
+  .alert-error {
+    background-color: rgb(255, 156, 156);
+    color: rgb(133, 0, 0);
+  }
+  .alert-error .message-btn-close{
+    background-color: rgb(133, 0, 0);
+    color: white;
+  }
+  
+  /* Info message */
+  .alert-info {
+    color: #31708f;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+  }
+  
+  /* Warning message */
+  .alert-warning {
+    color: #8a6d3b;
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+  }
+
+  /* COURSE DETAIL */
+  .course-detail{
+    width: 90%;
+    height: 500px;
+    background-color: var(--secondary);
+    margin: 25px auto;
+    border-radius: 25px;
+  }

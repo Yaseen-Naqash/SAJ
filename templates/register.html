@@ -7,11 +7,21 @@
     {% load static %}
 
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="icon" href="../media/education_graduate_college_university_cap_graduation_icon_262277.ico" type="image/x-icon">
 
 
     
 </head>
 <body>
+  {% if messages %}
+      <div class="messages" id="messages">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            <h3 style="margin: 0 auto;">{{ message }}</h3>
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
     <div class="box">
         <h2>خانه برنامه نویسان اهواز</h2>
         
@@ -19,13 +29,14 @@
         <h3> ثبت نام</h3>
         
 
-        <form>
+        <form method="POST" action="" >
+          {% csrf_token %}
           <div class="user-box">
-            <input type="text" name="username" required dir="rtl">
+            <input type="text" name="firstName" required dir="rtl">
             <label>نام </label>
           </div>
           <div class="user-box">
-            <input type="text" name="username" required>
+            <input type="text" name="lastName" required>
             <label> نام خانوادگی</label>
           </div>
           <div class="user-box">
@@ -33,16 +44,16 @@
             <label>رمز عبور</label>
           </div>
           <div class="user-box">
-            <input type="password" name="password" required>
+            <input type="password" name="confirmPassword" required>
             <label>تکرار رمز عبور</label>
           </div>
           <div class="user-box">
-            <input type="text" id="phone_number" name="phone_number" required>
+            <input type="text" id="phone_number" name="phone" required>
             <label>شماره تلفن</label>
           </div>
           <button class="button" type="button" id="send-code-btn"> ارسال کد</button>
           <div class="user-box">
-            <input type="text" name="password" required>
+            <input type="text" name="confirmationCode" required>
             <label> کد 4 رقمی</label>
           </div>
           <div class="buttons">
@@ -107,5 +118,7 @@
           }, 1000);  // Run the interval every second
       }
       </script>
+          <script src="{% static 'js/base.js' %}"></script>
+
 </body>
 </html>

@@ -3,11 +3,12 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}My Website{% endblock %}</title>
+    <title>{% block title %}APhome{% endblock %}</title>
     {% load static %}
     <!-- Global CSS (like your base styles) -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    
+    <link rel="icon" href="../media/education_graduate_college_university_cap_graduation_icon_262277.ico" type="image/x-icon">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Material+Icons+Round'>
     <!-- Additional CSS for individual pages can be added here -->
     {% block extra_css %}{% endblock %}
 </head>
@@ -26,62 +27,73 @@
                   </svg>
                 </a>
 
-                <h4 class="link-text">خانه برنامه نویسان اهواز</h4>
+                <p class="link-text" style="font-size: 16px; text-align: right;">خانه برنامه نویسان اهواز</p>
               </li>
+              {% if request.user.is_authenticated %}
+                  <li class="navbar-item flexbox-left">
+                      <a href="#" class="navbar-item-inner flexbox-left">
+                          <div class="navbar-item-inner-icon-wrapper flexbox">
+                              <img class="small-profile" src="{% static 'media/default_profile.png' %}">
+                          </div>
+                          <span class="link-text">{{ request.user.first_name }} {{ request.user.last_name }}</span>
+                      </a>
+                  </li>
+              {% endif %}
+
               <li class="navbar-item flexbox-left">
-                <a class="navbar-item-inner flexbox-left">
+                <a href="{% url 'courses_url' %}" class="navbar-item-inner flexbox-left">
                   <div class="navbar-item-inner-icon-wrapper flexbox">
-                    <ion-icon name="search-outline"></ion-icon>
+                    <img class="icon" src="{% static 'media/icons/course.png' %}" alt="">
                   </div>
-                  <span class="link-text">Search</span>
+                  <span class="link-text">دوره ها</span>
                 </a>
               </li>
               <li class="navbar-item flexbox-left">
                 <a class="navbar-item-inner flexbox-left">
                   <div class="navbar-item-inner-icon-wrapper flexbox">
-                    <ion-icon name="home-outline"></ion-icon>
+                    <img class="icon" src="{% static 'media/icons/flow-chart.png' %}" alt="">
                   </div>
-                  <span class="link-text">Home</span>
+                  <span class="link-text">چارت درسی </span>
                 </a>
               </li>
               <li class="navbar-item flexbox-left">
                 <a class="navbar-item-inner flexbox-left">
                   <div class="navbar-item-inner-icon-wrapper flexbox">
-                    <ion-icon name="folder-open-outline"></ion-icon>
+                    <img class="icon" src="{% static 'media/icons/weekly.png' %}" alt="">
                   </div>
-                  <span class="link-text">Projects</span>
+                  <span class="link-text">برنامه کلاس ها</span>
                 </a>
               </li>
               <li class="navbar-item flexbox-left">
                 <a class="navbar-item-inner flexbox-left">
                   <div class="navbar-item-inner-icon-wrapper flexbox">
-                    <ion-icon name="pie-chart-outline"></ion-icon>
+                    <img class="icon" src="{% static 'media/icons/exams.png' %}" alt="">
                   </div>
-                  <span class="link-text">Dashboard</span>
+                  <span class="link-text">برنامه امتحانات</span>
                 </a>
               </li>
               <li class="navbar-item flexbox-left">
                 <a class="navbar-item-inner flexbox-left">
                   <div class="navbar-item-inner-icon-wrapper flexbox">
-                    <ion-icon name="people-outline"></ion-icon>
+                    <img class="icon" src="{% static 'media/icons/a-.png' %}" alt="">
                   </div>
-                  <span class="link-text">Team</span>
+                  <span class="link-text">کارنامه</span>
                 </a>
               </li>
               <li class="navbar-item flexbox-left">
                 <a class="navbar-item-inner flexbox-left">
                   <div class="navbar-item-inner-icon-wrapper flexbox">
-                    <ion-icon name="chatbubbles-outline"></ion-icon>
+                    <img class="icon" src="{% static 'media/icons/money-transfer.png' %}" style="scale: 1.2;" alt="">
                   </div>
-                  <span class="link-text">Support</span>
+                  <span class="link-text">اطلاعات مالی</span>
                 </a>
               </li>
               <li class="navbar-item flexbox-left">
-                <a class="navbar-item-inner flexbox-left">
+                <a href="{% url 'logout_url' %}" class="navbar-item-inner flexbox-left">
                   <div class="navbar-item-inner-icon-wrapper flexbox">
-                    <ion-icon name="settings-outline"></ion-icon>
+                    <img class="icon" src="{% static 'media/icons/log-out.png' %}" style="scale: 1.1;" alt="">
                   </div>
-                  <span class="link-text">Settings</span>
+                  <p class="link-text" style="text-align: right;">خروج</p>
                 </a>
               </li>
             </ul>
@@ -90,12 +102,25 @@
 
     <!-- Main content area -->
     <main>
-        <a href="{% url 'student_login_url' %}">ورود دانشجو</a>
-        <a href="{% url 'teacher_login_url' %}">ورود استاد</a>
-        <a href="{% url 'register_url' %}">ثبت نام</a>
-        {% block content %}
-        <!-- Default content if no block is defined -->
+      {% if messages %}
+      <div class="messages" id="messages">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            <h3 style="margin: 0 auto;">{{ message }}</h3>
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
         
+        {% block content %}
+        <div class="box">
+          <h1>پیشرفت فعلی</h1>
+          <a href="{% url 'student_login_url' %}">ورود دانشجو</a>
+          <a href="{% url 'teacher_login_url' %}">ورود استاد</a>
+          <a href="{% url 'register_url' %}">ثبت نام</a>
+          <a href="{% url 'logout_url' %}">خروج</a>
+
+        </div>
         {% endblock %}
     </main>
 
@@ -109,8 +134,7 @@
     {% block extra_js %}{% endblock %}
     <!-- Global JS (like common scripts) -->
     <script src="{% static 'js/base.js' %}"></script>
-    <script src='https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js'></script>
-    <script src='https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js'></script>
+    
     
 
 </body>

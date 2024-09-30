@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
 from pathlib import Path
-
+from celery.schedules import crontab
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -27,7 +27,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+CELERY_BEAT_SCHEDULE = {
+    'update-inactive-students': {
+        'task': 'your_app.tasks.update_inactive_students',
+        'schedule': crontab(hour=0, minute=0),  # Run daily at midnight
+    },
+}
 # Application definition
 
 INSTALLED_APPS = [
@@ -37,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'django_celery_beat',
 
     'a_institution_management',
     'a_user_management',
@@ -54,7 +61,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'SAJ.urls'
-
+LOGIN_URL = '/authentication/student-login/'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    APhome | Courses
+{% endblock %}
+{% load static %}
+
+
+{% block extra_css %}
+    <style></style>
+{% endblock %}
+
+
+{% block content %}
+    <form action="" method="POST" style="width: 100%;">
+        {% csrf_token %}
+        <div class="filter-box">
+            <div class="user-box">
+                <input type="text" name="username" required>
+                <label> جستوحو در دوره ها</label>
+            </div>
+            <button class="button" type="submit">جستوحو</button>
+
+        </div>
+    </form>
+    <div class="courses-wrapper">
+        {% for course in courses %}
+        <div class="course">
+            {% if course.course_img %}
+                <img src="{{ course.course_img.url }}" alt="{{ course.title }}">
+            {% else %}
+                <img src="{% static 'media/no-course-image' %}" alt="{{ course.title }}">
+            {% endif %}
+            
+            <h1>{{ course.title }}</h1>
+            <p>{{ course.description|default:"No description available" }}</p>
+            
+            <h5 style="padding: 0 10px;">وضعیت: 
+                {% if course.course_status == '1' %}
+                    در حال ثبت نام
+                {% else %}
+                    اتمام مهلت ثبت نام
+                {% endif %}
+            </h5>
+            
+            <a class="button" href="{% url 'course_detail_url' course.pk %}">جزییات</a>
+        </div>
+        {% endfor %}
+        
+    </div>
+{% endblock %}
+
+
+{% block extra_js %}
+    <script></script>
+{% endblock %}

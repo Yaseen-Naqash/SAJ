@@ -22,6 +22,8 @@ from a_user_management import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('authentication/', include('a_user_management.urls')),
+    path('courses/', include('a_course_management.urls')),
+
     path('',views.home,name='home'),
     path('send-code/', views.send_code, name='send_code'),
 ]
