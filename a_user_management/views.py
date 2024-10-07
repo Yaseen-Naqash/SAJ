@@ -58,8 +58,12 @@ def logout_command(request):
 
 def students_login(request):
     if request.method == 'POST':
+
+
         phone = request.POST.get('username')
         password = request.POST.get('password')
+
+        
         student = Student.objects.get(phone=phone)
         if student and student.password == password:
             login(request, student)

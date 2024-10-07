@@ -113,7 +113,7 @@ class Student(Person):
 
 
     class Meta:
-        verbose_name = "Student"  # Singular name for admin
-        verbose_name_plural = "Students"  # Plural name for admin
+        verbose_name = "دانشجو"  # Singular name for admin
+        verbose_name_plural = "دانشجو ها"  # Plural name for admin
     def __str__(self):
         return f"Student: {self.first_name} {self.last_name}"

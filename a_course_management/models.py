@@ -19,6 +19,10 @@ class Course(models.Model):
         ('1','در حال ثبت نام'),
         
     ]
+    INSTALLMENT = [
+        ('0','ندارد'),
+        ('1','دارد'),
+    ]
 
 
     title = models.CharField(max_length=255, null=True, blank=True)
@@ -26,6 +30,9 @@ class Course(models.Model):
     prerequisites = models.ManyToManyField('Course', related_name='required_for',blank=True) # math101.required_for.all()  # Returns [math102]
     course_img = models.ImageField(upload_to='Course_images/', null=True, blank=True)
     course_status = models.CharField(default=1,max_length=1,choices=TYPE)
+    price = models.CharField(max_length=127, null=True, blank=True)
+    installment = models.CharField(default=0,max_length=1,choices=INSTALLMENT, null=True, blank=True)
+    courseDuration = models.CharField(max_length=127, null=True , blank=True)
 
     def __str__(self):
         return self.title
@@ -44,6 +51,7 @@ class SectionTimeSlot(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='time_slots')
     day_of_week = models.CharField(max_length=3, choices=DaysOfWeek.choices)  # Store the selected day
     timeOfSection = models.CharField(max_length=127, null=True, blank=True)
+    place = models.CharField(max_length=63, null=True, blank=True)
     class Meta:
         unique_together = ('section', 'day_of_week')  # u cant have two time slot in same day
 

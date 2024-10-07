@@ -20,20 +20,114 @@
         {% endif %}
         
         <h1>{{ course.title }}</h1>
-        <p>{{ course.description|default:"No description available" }}</p>
-        
-        <p>وضعیت: 
-            {% if course.course_status == '1' %}
-                در حال ثبت نام
-            {% else %}
-                اتمام مهلت ثبت نام
-            {% endif %}
-        </p>
+        <p style="padding: 25px;">{{ course.description|default:"No description available" }}</p>
+        <div style="width: fit-content; display: flex; flex-direction: row; justify-content: right; align-items: center; margin-left: auto; margin-right: 20px;">
+            <p> پیش نیاز های دوره : </p>
+            {% for prerequisite in course.prerequisites.all %}
+            <p class="course-details-prerequisites">{{prerequisite.title}}</p>
+            {% endfor %}
+
+        </div>
+        <div class="course-details-info">
+            <p>وضعیت : 
+                {% if course.course_status == '1' %}
+                    در حال ثبت نام
+                {% else %}
+                    اتمام مهلت ثبت نام
+                {% endif %}
+            </p>
+    
+            <p>هزینه دوره : {{course.price}}</p>
+            <p> شرایط اقساط : {% if course.installment == '1' %} ندارد {% elif course.installment == '0' %} دارئ {% else %} نامشخص {% endif %}</p>
+            <p>مدت زمان دوره : {{ course.courseDuration }} </p>
+        </div>
+        <div class="section-box">
+            <div class="section-row section-header">
+                <div class="section-cell">شماره سکشن</div>
+                <div class="section-cell">استاد سکشن</div>
+                <div class="section-cell">ظرفیت</div>
+                <div class="section-cell">ظرفیت باقی مانده</div>
+                <div class="section-cell"> زمان سکشن</div>            
+                <div class="section-cell">لینک ثبت نام</div>
+            </div>
+
+            <!-- Data Row 1 -->
+             {% for section in course.sections.all %}
+            <div class="section-row">
+                <div class="section-cell">{{ forloop.counter }}</div>
+                <div class="section-cell">{{section.teacher.first_name}} {{section.teacher.last_name}}</div>
+                <div class="section-cell">{{section.capacity}}</div>
+                <div class="section-cell">{{section.registered}}</div>
+                <div class="section-cell"><a href="#" class="button show-dialog" style="padding: 5px 15px;" data-section-id="{{ section.id }}"
+                    data-info="
+                    
+                    ">زمان</a>
+                </div>
+                <div id="timeslot-info-{{ section.id }}" style="display: none;">
+                    {% for timeslot in section.time_slots.all %}
+                    {{timeslot.day_of_week}} {{timeslot.timeOfSection}} {{timeslot.place}}<br>
+                    {% endfor %}
+                </div>
+                <div class="section-cell"><a href="" class="button" style="padding: 5px 15px;">ثبت نام</a></div>
+
+            </div>
+            {% endfor %}
+            
+                <!-- Dialog Box -->
+            <div id="dialog" class="dialog">
+                <div class="dialog-content">
+                <span class="close-button">&times;</span>
+                <h2>زمان سکشن</h2>
+                <p id="dialog-info">This is dynamic content that will change for each session.</p>
+                </div>
+            </div>
+        </div>
         
     </div>
+
 {% endblock %}
 
 
 {% block extra_js %}
-    <script></script>
+    <script>
+                // Get the dialog element
+        const dialog = document.getElementById("dialog");
+        // Get the element where we'll display dynamic info
+        const dialogInfo = document.getElementById("dialog-info");
+        // Get the close button element
+        const closeButton = document.querySelector(".close-button");
+
+        // Add event listeners to all the "زمان" links
+        document.querySelectorAll(".show-dialog").forEach(link => {
+        link.addEventListener("click", function (event) {
+            event.preventDefault(); // Prevent default link behavior
+
+            dialog.style.display = "flex";
+            const sectionId = this.getAttribute("data-section-id");
+            const timeslotInfo = document.getElementById(`timeslot-info-${sectionId}`);
+            if (timeslotInfo) {
+                dialogInfo.innerHTML = timeslotInfo.innerHTML;
+            }
+         });
+        });
+
+        // Close button functionality
+        document.querySelector(".close-button").addEventListener("click", function () {
+        dialog.style.display = "none";
+        });
+
+
+        // Event listener to close the dialog when close button is clicked
+        closeButton.addEventListener("click", function () {
+        dialog.style.display = "none";
+        });
+
+        // Optionally, close the dialog if the user clicks outside the dialog-content
+        window.addEventListener("click", function (event) {
+        if (event.target === dialog) {
+            dialog.style.display = "none";
+        }
+        });
+
+    </script>
 {% endblock %}
