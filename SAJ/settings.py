@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
 from pathlib import Path
-from celery.schedules import crontab
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -27,12 +26,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-CELERY_BEAT_SCHEDULE = {
-    'update-inactive-students': {
-        'task': 'your_app.tasks.update_inactive_students',
-        'schedule': crontab(hour=0, minute=0),  # Run daily at midnight
-    },
-}
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -43,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'django_celery_beat',
+    'django_jalali',
 
     'a_institution_management',
     'a_user_management',
@@ -114,14 +108,15 @@ AUTH_USER_MODEL = 'a_user_management.Person'
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'fa-ir'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tehran'
 
 USE_I18N = True
 
 USE_TZ = True
-
+DATE_FORMAT = 'Y/m/d'  # Example: 1378/08/11
+DATETIME_FORMAT = 'Y/m/d H:i:s'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/

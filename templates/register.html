@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAJ | ورود</title>
     {% load static %}
+    <script src="{% static 'js/the-datepicker.js' %}"></script>
 
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/the-datepicker.css' %}">
+
     <link rel="icon" href="../media/education_graduate_college_university_cap_graduation_icon_262277.ico" type="image/x-icon">
 
 
@@ -40,21 +43,55 @@
             <label> نام خانوادگی</label>
           </div>
           <div class="user-box">
-            <input type="password" name="password" required>
-            <label>رمز عبور</label>
+            <input type="text" name="fatherName" required>
+            <label> نام پدر </label>
           </div>
           <div class="user-box">
-            <input type="password" name="confirmPassword" required>
-            <label>تکرار رمز عبور</label>
+            <input type="text" name="codeMelli" required>
+            <label>کد ملی (رمز عبور اولیه)</label>
           </div>
+
+
+          <div class="user-box">
+            <input type="text" id="my-input" name="birthDayDate" >
+            <label for="basic"> تاریخ تولد</label>
+          </div>
+          
+          <div class="user-box">
+            <select name="educations" class="choice-field" required>
+                <option value="" disabled selected>انتخاب تحصیلات</option>
+                <option value="0">ابتدایی </option>
+                <option value="1">متوسطه اول</option>
+                <option value="2">متوسطه دوم</option>
+                <option value="3"> دیپلم</option>
+                <option value="4">کاردانی</option>
+                <option value="5">کارشناسی</option>
+                <option value="6">کارشناسی ارشد</option>
+                <option value="7">دکتری</option>
+            </select>
+        </div>
+          
           <div class="user-box">
             <input type="text" id="phone_number" name="phone" required>
             <label>شماره تلفن</label>
+          </div>
+          <div class="user-box">
+            <input type="text" name="phone2" required>
+            <label>شماره تلفن دوم</label>
           </div>
           <button class="button" type="button" id="send-code-btn"> ارسال کد</button>
           <div class="user-box">
             <input type="text" name="confirmationCode" required>
             <label> کد 4 رقمی</label>
+          </div>
+
+          <div class="" style="display: flex; flex-direction: row; justify-content: start; align-items: start; gap: 10px;">
+            <input type="checkbox" name="primaryState">
+            <label>با برنامه نویسی آشنایی دارم!</label>
+          </div>
+          <div class="" style="display: flex; flex-direction: row; justify-content: start; align-items: start; gap: 10px;">
+            <input type="checkbox" name="rules" required>
+            <label>با <a href="" style="color: rgb(54, 54, 252);">قوانین و مقررات</a> موافقم !</label>
           </div>
           <div class="buttons">
             <button class="button" type="submit">ثبت نام</button>
@@ -118,7 +155,15 @@
           }, 1000);  // Run the interval every second
       }
       </script>
-          <script src="{% static 'js/base.js' %}"></script>
+      <script src="{% static 'js/base.js' %}"></script>
+      <script>
+        const input = document.getElementById('my-input');
+        const datepicker = new TheDatepicker.Datepicker(input);
+        datepicker.options.setInitialDate("1378-8-11");
+        datepicker.reset();
+        datepicker.render();
 
+      </script>
+      <!-- DOCUMENTATION FOR DATEPICKER : https://thedatepicker.github.io/thedatepicker/ -->
 </body>
 </html>

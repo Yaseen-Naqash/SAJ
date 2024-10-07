@@ -1,13 +1,37 @@
 import json
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from a_user_management.models import Student
+from a_user_management.models import Student, PhoneVerification
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from datetime import datetime
 
+from django.utils import timezone
+import jdatetime
 
+    
 # Create your views here.
+
+def calculate_age(birth_day_date):
+    # Convert the Jalali birthday date string to a Jalali date
+    birth_day_date_jalali = jdatetime.datetime.strptime(birth_day_date, "%d. %m. %Y").date()
+    
+    # Convert Jalali date to Gregorian date
+    birth_day_date_gregorian = birth_day_date_jalali.togregorian()  # Correct method to convert to Gregorian
+
+    # Get the current date in Gregorian
+    current_date_gregorian = timezone.now().date()
+
+    # Calculate age
+    age = current_date_gregorian.year - birth_day_date_gregorian.year
+
+    # Check if the birthday has occurred this year yet
+    if (current_date_gregorian.month, current_date_gregorian.day) < (birth_day_date_gregorian.month, birth_day_date_gregorian.day):
+        age -= 1
+
+    return age
+
 @login_required
 def home(request):
 
@@ -60,34 +84,81 @@ def register(request):
     if request.method == 'POST':
         firstName = request.POST.get('firstName')
         lastName = request.POST.get('lastName')
-        password = request.POST.get('password')
-        confirmPassword = request.POST.get('confirmPassword')
-        confirmationCode = request.POST.get('confirmationCode')
+        password = request.POST.get('codeMelli')
+        codeMelli = request.POST.get('codeMelli')
+        birthDayDate = request.POST.get('birthDayDate')
         phone = request.POST.get('phone')
-        if password != confirmPassword:
-            print(password)
-            print(confirmPassword)
-            messages.error(request, 'خطا : تکرار رمز عبور اشتباه است.')
-            return redirect('register_url') 
+        phone2 = request.POST.get('phone2')
+        confirmationCode = request.POST.get('confirmationCode')
+        education = request.POST.get('educations')
+        primaryState = request.POST.get('primaryState')
+        birthDayDate_formatted = datetime.strptime(birthDayDate, "%d. %m. %Y").date()
 
-        
+        age = calculate_age(birthDayDate)
 
-        # Create the student instance
-        student = Student.objects.create(
-            first_name=firstName,
-            last_name=lastName,
-            password=confirmPassword,  # Store hashed password
-            phone=phone,
-            username=phone,
-        )
-        messages.success(request, 'موفق : اکانت شما ساخته شد.')
+        if age <= 9:
+            ageLevel = '0'
+        elif 9 < age <= 14:
+            ageLevel = '1'
+        else:
+            ageLevel = '2'
 
-        # Redirect to a success page or login page
-        return redirect('student_login_url')
+        if primaryState is None:
+            skillLevel = '0'
+        else:
+            skillLevel = '1'
+
+        if verify_code(phone, confirmationCode):
+            student = Student.objects.create(
+                first_name=firstName,
+                last_name=lastName,
+                password=password,
+                phone=phone,
+                phone2=phone2,
+                username=phone,
+                code_melli=codeMelli,
+                date_of_birth=birthDayDate_formatted,
+                education=education,
+                ageLevel = ageLevel,
+                skillLevel = skillLevel,
+            )
+            messages.success(request, 'موفق : اکانت شما ساخته شد.')
+
+            # Redirect to a success page or login page
+            return redirect('student_login_url')
+        else:
+            messages.error(request, 'کد تایید ارسال شده به تلفن شما معتبر نیست')
+
         
         
     context = {}
     return render(request,'register.html',context)
+
+
+from django.utils import timezone
+
+def generate_verification_code(phone_number):
+    verification = PhoneVerification(phone_number=phone_number)
+    verification.generate_code()
+    verification.save()
+    # Here you would send the code to the user's phone
+    # e.g., using a service like Twilio, Nexmo, etc.
+    return verification.verification_code
+
+def verify_code(phone_number, code):
+
+    verification = PhoneVerification.objects.filter(phone_number=phone_number).order_by('-created_at').first()
+    if verification is None:
+        return False
+    if verification.is_expired():
+        return False
+    
+    if verification.verification_code == code:
+        return True
+    else:
+        return False
+    
+
 
 def send_code(request):
     if request.method == 'POST':
@@ -95,8 +166,9 @@ def send_code(request):
         phone_number = data.get('phone_number')
 
         # Your logic for sending the verification code goes here
+        code = generate_verification_code(phone_number)
         # For example, you could use Twilio or another SMS service to send the code
-
+        print(code)
         if phone_number:
             # Assuming the logic is successful
             return JsonResponse({'success': True})

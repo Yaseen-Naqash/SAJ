@@ -1,5 +1,21 @@
 /* BASE */
-
+:root {
+    /* colors */
+    --primary: #DFF5FF;
+    --secondary  : #072750;
+    --accent : #6c6efd;
+    
+    /* Sizes */
+    --heading-large: 5.6rem;
+    --heading-medium: 3.6rem;
+    --heading-small: 2.4rem;
+    --paragraph: 1.11rem;
+    --navbar-buttons: 2.4rem;
+    /* misc */
+    --transition-main: .175, .685, .32;
+    /* Fonts */
+    --font-main: "Poppins";
+}
 *, *::before, *::after {
     box-sizing: inherit;
     direction: rtl;
@@ -32,23 +48,7 @@ a {
 
 /* NAVBAR */
 
-:root {
-    /* colors */
-    --primary: #DFF5FF;
-    --secondary  : #072750;
-    --accent : #6c6efd;
-    
-    /* Sizes */
-    --heading-large: 5.6rem;
-    --heading-medium: 3.6rem;
-    --heading-small: 2.4rem;
-    --paragraph: 1.11rem;
-    --navbar-buttons: 2.4rem;
-    /* misc */
-    --transition-main: .175, .685, .32;
-    /* Fonts */
-    --font-main: "Poppins";
-}
+
 
 
 /* =======
@@ -369,6 +369,16 @@ ul, ol {
 
 
 /* FIELDS */
+
+
+.choice-field{
+    color: var(--primary);
+    width: 100%;
+    padding: 10px;
+    background-color: var(--secondary);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+}
 .user-box {
     width: 100%;
     position: relative;

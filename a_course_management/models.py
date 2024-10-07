@@ -1,6 +1,5 @@
 from django.db import models
 from a_user_management.models import Teacher, Student
-from multiselectfield import MultiSelectField
 
 # Create your models here.
 
