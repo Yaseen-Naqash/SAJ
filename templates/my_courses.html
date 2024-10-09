@@ -4,7 +4,7 @@
     Aphome | دوره های من
 {% endblock %}
 {% load static %}
-
+{% load jalali_tags %}
 
 {% block extra_css %}
     <style></style>
@@ -14,9 +14,27 @@
 {% block content %}
 
 <div class="my-courses">
+
+    {% for section in sections %}
     <div class="my-course">
+        {% if section.course.course_img %}
+        <img src="{{ section.course.course_img.url }}" alt="{{ section.course.title }}">
+        {% else %}
+        <img src="{% static 'default_course_image.jpg' %}" alt="{{ section.course.title }}">
+        {% endif %}
+
+        <h1>{{ section.course.title }}</h1>
+        <p>{{ section.teacher.first_name }} {{ section.teacher.last_name }} | {{ section.name }}</p>
+        
+        {% for timeslot in section.time_slots.all %}
+        <p>{{timeslot.get_day_of_week_display}} {{timeslot.timeOfSection}} {{timeslot.place}}</p><br>
+        {% endfor %}
+
+        <p>{{ section.exam.exam_time|jformat:"%Y/%m/%d"  }}</p>
+        <p>در حال تحصیل</p>
         
     </div>
+    {% endfor %}
 </div>
 
 

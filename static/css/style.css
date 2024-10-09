@@ -17,6 +17,8 @@
     --font-main: "Poppins";
 }
 *, *::before, *::after {
+  padding: 0;
+  margin: 0;
     box-sizing: border-box;
     direction: rtl;
 }
@@ -469,7 +471,7 @@ ul, ol {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: start;
+    justify-content: space-between;
     align-items: start;
     
 }
@@ -498,7 +500,6 @@ ul, ol {
 .course .button{
     width: 100px;
     text-align: center;
-    margin-top: auto;
     margin-bottom: 10px;
 }
 
@@ -668,7 +669,8 @@ ul, ol {
   }
   
   .course-details-info{
-    
+    margin-top: 15px;
+    padding: 15px 0;
     border: 3px solid #6c6efd;
     border-radius: 15px;
     width: 95%;
@@ -734,7 +736,7 @@ ul, ol {
     height: 180px;
     display: flex;
     flex-direction: column;
-    justify-content: start;
+    justify-content: space-between;
     align-items: start;
     background-color: var(--secondary);
     border-radius: 20px;
@@ -752,7 +754,6 @@ ul, ol {
     text-align: start;
   }
   .notif .informations{
-    margin: auto 0;
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -784,6 +785,14 @@ ul, ol {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: start;
-    align-items: start;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
   }
+
+  .my-course img{
+    width: 100%;
+    margin: 0 auto;
+    height: 180px;
+    object-fit: cover;
+}

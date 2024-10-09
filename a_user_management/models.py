@@ -24,6 +24,10 @@ class PhoneVerification(models.Model):
     def is_expired(self):
 
         return timezone.now() > self.created_at + timezone.timedelta(seconds=120)
+    
+    class Meta:
+        verbose_name = "تاییدیه شماره"  # Singular name for admin
+        verbose_name_plural = " تاییدیه شماره ها"  # Plural name for admin
 
     def generate_code(self):
         self.verification_code = str(random.randint(1000, 9999))
@@ -34,7 +38,7 @@ class Owner(Person):
     institution = models.OneToOneField(Institution, on_delete=models.CASCADE, related_name='owner', null=True, blank=True)
 
     def __str__(self):
-        return f"Owner: {self.first_name} {self.last_name}"
+        return f"مالک: {self.first_name} {self.last_name}"
     
     
 
@@ -44,7 +48,7 @@ class Admin(Person):
     branch = models.OneToOneField(Branch, on_delete=models.CASCADE, related_name='admin', null=True, blank=True)
 
     def __str__(self):
-        return f"Admin: {self.first_name} {self.last_name}"
+        return f"مدیر: {self.first_name} {self.last_name}"
     
 
 
@@ -53,7 +57,7 @@ class Employee(Person):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='employees', null=True, blank=True)
 
     def __str__(self):
-        return f"Employee: {self.first_name} {self.last_name}"
+        return f"کارمند: {self.first_name} {self.last_name}"
     
 
 class Teacher(Person):
@@ -63,10 +67,10 @@ class Teacher(Person):
 
 
     class Meta:
-        verbose_name = "Teacher"  # Singular name for admin
-        verbose_name_plural = "Teachers"  # Plural name for admin
+        verbose_name = "استاد"  # Singular name for admin
+        verbose_name_plural = "اساتید"  # Plural name for admin
     def __str__(self):
-        return f"Teacher: {self.first_name} {self.last_name}"
+        return f"استاد: {self.first_name} {self.last_name}"
     
 
 
@@ -116,4 +120,4 @@ class Student(Person):
         verbose_name = "دانشجو"  # Singular name for admin
         verbose_name_plural = "دانشجو ها"  # Plural name for admin
     def __str__(self):
-        return f"Student: {self.first_name} {self.last_name}"
+        return f"دانشجو: {self.first_name} {self.last_name}"

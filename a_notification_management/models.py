@@ -11,8 +11,12 @@ class News(models.Model):
     updated_at = models.DateTimeField(auto_now=True)   
     author = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='news', null=True, blank=True)
 
+    class Meta:
+        verbose_name = "خبر" 
+        verbose_name_plural = "اخبار" 
+
     def __str__(self):
-        return f"News: {self.title} from {self.author.first_name} {self.author.last_name}"
+        return f"خبر: {self.title} از {self.author.first_name} {self.author.last_name}"
     
 class Notification(models.Model):
     title = models.CharField(max_length=63, null=True, blank=True)
@@ -23,6 +27,10 @@ class Notification(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='notification', null=True, blank=True)
 
     def __str__(self):
-        return f"Notification: {self.title} from {self.author.first_name} {self.author.last_name}"
+        return f"اطلاعیه: {self.title} از {self.author.first_name} {self.author.last_name}"
+    
+    class Meta:
+        verbose_name = "اطلاعیه" 
+        verbose_name_plural = "اطلاعه ها" 
     
  

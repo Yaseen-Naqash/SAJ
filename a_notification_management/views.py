@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from a_user_management.models import Student
 from a_notification_management.models import Notification, News
+from django.contrib import messages
 
 # Create your views here.
 
@@ -14,6 +15,9 @@ def home(request):
     student = None
     if hasattr(request.user, 'student'):
         student = request.user.student
+    else:
+        messages.error(request,'لطفا با یک حساب به عنوان دانشجو وارد شوید!')
+        return redirect('student_login_url')
     
     news = News.objects.all()
 

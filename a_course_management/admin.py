@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Course, Section, SectionTimeSlot
+from .models import Course, Section, SectionTimeSlot, Exam, HomeWork, HomeWorkDocument, ExamDocument, Degree
 # Register your models here.
 admin.site.register(SectionTimeSlot)
 
@@ -22,3 +22,14 @@ class SectionAdmin(admin.ModelAdmin):
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
     inlines = [SectionInline]
+
+
+admin.site.register(Degree)
+admin.site.register(Exam)
+
+admin.site.register(ExamDocument)
+
+admin.site.register(HomeWork)
+admin.site.register(HomeWorkDocument)
+
+

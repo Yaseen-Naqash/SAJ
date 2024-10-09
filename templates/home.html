@@ -4,6 +4,7 @@
     APhome | خانه
 {% endblock %}
 {% load static %}
+{% load jformat %}
 
 
 {% block extra_css %}
@@ -19,7 +20,7 @@
             <p>{{ notif.description }}</p>
             <div class="informations">
                 <p>{{ notif.section.course.title }}</p>
-                <p> {{ notif.section.teacher.first_name }} {{ notif.section.teacher.last_name }} | {{ notif.created_at }}</p>
+                <p> {{ notif.section.teacher.first_name }} {{ notif.section.teacher.last_name }} | {{ notif.created_at|jformat:"%Y/%m/%d" }}</p>
             </div>
             <button class="button" id="notif-close-btn" style="width: 80px;">بستن</button>
         </div>
@@ -38,7 +39,7 @@
             <p>{{ new.description }}</p>
             <div class="informations">
                 <p>نوشته شده توسط : {{ new.author.first_name }} {{ new.author.last_name }}</p>
-                <p>{{ new.created_at }}</p>
+                <p>{{ new.created_at|jformat:"%Y/%m/%d"  }}</p>
 
             </div>
         </div>
@@ -48,5 +49,21 @@
 
 
 {% block extra_js %}
-    <script></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Get all the buttons with the class 'button' for closing notifications
+        const closeButtons = document.querySelectorAll('.button');
+    
+        closeButtons.forEach(function(button) {
+            // Add an event listener for the 'click' event to each button
+            button.addEventListener('click', function() {
+                // Find the parent notification div with the class 'notif'
+                const notif = this.closest('.notif');
+                if (notif) {
+                    notif.style.display = 'none';  // Hide the notification
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}
