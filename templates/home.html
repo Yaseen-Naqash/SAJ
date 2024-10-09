@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    APhome | خانه
+{% endblock %}
+{% load static %}
+
+
+{% block extra_css %}
+    <style></style>
+{% endblock %}
+
+
+{% block content %}
+    <div class="home-wrapper">
+        {% for notif in notifs %}
+        <div class="notif">
+            <h1>{{ notif.title }}</h1>
+            <p>{{ notif.description }}</p>
+            <div class="informations">
+                <p>{{ notif.section.course.title }}</p>
+                <p> {{ notif.section.teacher.first_name }} {{ notif.section.teacher.last_name }} | {{ notif.created_at }}</p>
+            </div>
+            <button class="button" id="notif-close-btn" style="width: 80px;">بستن</button>
+        </div>
+        {% endfor %}
+
+
+        {% for new in news %}
+        <div class="news">
+
+            {% if new.news_img %}
+            <img src="{{ new.news_img.url }}" alt="{{ new.title }}">
+            {% else %}
+            <img src="{% static 'default_course_image.jpg' %}" alt="{{ new.title }}">
+            {% endif %}
+            <h1>{{ new.title }}</h1>
+            <p>{{ new.description }}</p>
+            <div class="informations">
+                <p>نوشته شده توسط : {{ new.author.first_name }} {{ new.author.last_name }}</p>
+                <p>{{ new.created_at }}</p>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+
+{% block extra_js %}
+    <script></script>
+{% endblock %}

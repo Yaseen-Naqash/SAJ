@@ -27,7 +27,7 @@
                   </svg>
                 </a>
 
-                <p class="link-text" style="font-size: 16px; text-align: right;">خانه برنامه نویسان اهواز</p>
+                <p class="link-text" style="font-size: 16px; text-align: right;"><a href="{% url 'home_url' %}" style="color: #DFF5FF;">خانه برنامه نویسان اهواز</a></p>
               </li>
               {% if request.user.is_authenticated %}
                   <li class="navbar-item flexbox-left">
@@ -49,11 +49,11 @@
                 </a>
               </li>
               <li class="navbar-item flexbox-left">
-                <a class="navbar-item-inner flexbox-left">
+                <a href="{% url 'my-courses_url' %}" class="navbar-item-inner flexbox-left">
                   <div class="navbar-item-inner-icon-wrapper flexbox">
                     <img class="icon" src="{% static 'media/icons/flow-chart.png' %}" alt="">
                   </div>
-                  <span class="link-text">چارت درسی </span>
+                  <span class="link-text">دوره های من </span>
                 </a>
               </li>
               <li class="navbar-item flexbox-left">

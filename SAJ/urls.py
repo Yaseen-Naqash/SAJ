@@ -18,14 +18,15 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
-from a_user_management import views
+from a_user_management.views import send_code
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('authentication/', include('a_user_management.urls')),
     path('courses/', include('a_course_management.urls')),
+    path('', include('a_notification_management.urls')),
 
-    path('',views.home,name='home'),
-    path('send-code/', views.send_code, name='send_code'),
+
+    path('send-code/', send_code, name='send_code'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

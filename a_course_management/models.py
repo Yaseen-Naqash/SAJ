@@ -47,6 +47,7 @@ class Section(models.Model):
 
     def __str__(self):
         return f'{self.course.title} - {self.teacher}'
+    
 class SectionTimeSlot(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='time_slots')
     day_of_week = models.CharField(max_length=3, choices=DaysOfWeek.choices)  # Store the selected day
@@ -57,6 +58,9 @@ class SectionTimeSlot(models.Model):
 
     def __str__(self):
         return f"{self.section} ({self.day_of_week} : {self.timeOfSection})"
+
+
+
 
 
 class Exam(models.Model):
@@ -83,6 +87,28 @@ class HomeWorkDocument(models.Model):
     homeWork = models.ForeignKey(HomeWork,on_delete=models.CASCADE, related_name='documents', null=True, blank=True)
     pdf = models.FileField(upload_to='homeWorks/pdfs/')  # 'documents/pdfs/' is the upload path
     created_at = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
-    updated_at = models.DateTimeField(auto_now=True)  
+    updated_at = models.DateTimeField(auto_now=True)
+    
     def __str__(self):
         return self.student
+    
+
+class ExamDocument(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='exams', null=True, blank=True)
+    exam = models.ForeignKey(Exam,on_delete=models.CASCADE, related_name='exams', null=True, blank=True)
+    pdf = models.FileField(upload_to='homeWorks/pdfs/')  # 'documents/pdfs/' is the upload path
+    created_at = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
+    updated_at = models.DateTimeField(auto_now=True)
+    score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    
+    def __str__(self):
+        return self.student
+    
+class Degree(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='degrees', null=True, blank=True)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='degrees', null=True, blank=True)
+
+    score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
+    updated_at = models.DateTimeField(auto_now=True)

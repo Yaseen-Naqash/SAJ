@@ -10,3 +10,14 @@ def course_detail(request,pk):
     course = get_object_or_404(Course, pk=pk)  # Fetch course by pk
     context = {'course':course}
     return render(request,'course_detail.html',context)
+
+def my_courses(request):
+
+    student = None
+    if hasattr(request.user, 'student'):
+        student = request.user.student  
+
+     
+
+    context = {}
+    return render(request,'my_courses.html',context)

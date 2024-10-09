@@ -1,7 +1,7 @@
 import json
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from a_user_management.models import Student, PhoneVerification
+from a_user_management.models import Student, PhoneVerification, Teacher
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -13,6 +13,8 @@ import jdatetime
     
 # Create your views here.
 
+
+
 def calculate_age(birth_day_date):
     # Convert the Jalali birthday date string to a Jalali date
     birth_day_date_jalali = jdatetime.datetime.strptime(birth_day_date, "%d. %m. %Y").date()
@@ -20,13 +22,11 @@ def calculate_age(birth_day_date):
     # Convert Jalali date to Gregorian date
     birth_day_date_gregorian = birth_day_date_jalali.togregorian()  # Correct method to convert to Gregorian
 
-    # Get the current date in Gregorian
     current_date_gregorian = timezone.now().date()
 
     # Calculate age
     age = current_date_gregorian.year - birth_day_date_gregorian.year
 
-    # Check if the birthday has occurred this year yet
     if (current_date_gregorian.month, current_date_gregorian.day) < (birth_day_date_gregorian.month, birth_day_date_gregorian.day):
         age -= 1
 
@@ -63,12 +63,17 @@ def students_login(request):
         phone = request.POST.get('username')
         password = request.POST.get('password')
 
-        
-        student = Student.objects.get(phone=phone)
+
+        try:
+            student = Student.objects.get(phone=phone)
+        except Student.DoesNotExist:
+            messages.error(request, 'خطا : اطلاعات شما اشتباه است.')  
+            return redirect('student_login_url')  
+
         if student and student.password == password:
             login(request, student)
             messages.success(request, 'موفق : شما با موفقیت وارد شدید.')
-            return redirect('home')  
+            return redirect('home_url')  
         else:
             messages.error(request, 'خطا : اطلاعات شما اشتباه است.')  
 
@@ -128,7 +133,6 @@ def register(request):
             )
             messages.success(request, 'موفق : اکانت شما ساخته شد.')
 
-            # Redirect to a success page or login page
             return redirect('student_login_url')
         else:
             messages.error(request, 'کد تایید ارسال شده به تلفن شما معتبر نیست')
@@ -145,8 +149,6 @@ def generate_verification_code(phone_number):
     verification = PhoneVerification(phone_number=phone_number)
     verification.generate_code()
     verification.save()
-    # Here you would send the code to the user's phone
-    # e.g., using a service like Twilio, Nexmo, etc.
     return verification.verification_code
 
 def verify_code(phone_number, code):
