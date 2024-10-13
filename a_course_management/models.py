@@ -14,25 +14,20 @@ class DaysOfWeek(models.TextChoices):
 
 
 class Course(models.Model):
-    TYPE = [
-        ('0','اتمام مهلت ثبت نام'),
-        ('1','در حال ثبت نام'),
-        
-    ]
+
     INSTALLMENT = [
         ('0','ندارد'),
         ('1','دارد'),
     ]
 
 
-    title = models.CharField(max_length=255, null=True, blank=True)
-    description = models.TextField(max_length=2047, null=True , blank=True)
-    prerequisites = models.ManyToManyField('Course', related_name='required_for',blank=True) # math101.required_for.all()  # Returns [math102]
-    course_img = models.ImageField(upload_to='Course_images/', null=True, blank=True)
-    course_status = models.CharField(default=1,max_length=1,choices=TYPE)
-    price = models.CharField(max_length=127, null=True, blank=True)
-    installment = models.CharField(default=0,max_length=1,choices=INSTALLMENT, null=True, blank=True)
-    courseDuration = models.CharField(max_length=127, null=True , blank=True)
+    title = models.CharField(max_length=255, null=True, blank=True, verbose_name='نام دوره')
+    description = models.TextField(max_length=2047, null=True , blank=True, verbose_name='توضیحات')
+    prerequisites = models.ManyToManyField('Course', related_name='required_for',blank=True, verbose_name='پیشنیاز ها') # math101.required_for.all()  # Returns [math102]
+    course_img = models.ImageField(upload_to='Course_images/', null=True, blank=True, verbose_name='تصویر دوره')
+    price = models.CharField(max_length=127, null=True, blank=True, verbose_name='قیمت ثبت نام')
+    installment = models.CharField(default=0,max_length=1,choices=INSTALLMENT, null=True, blank=True, verbose_name='اقساط')
+    courseDuration = models.CharField(max_length=127, null=True , blank=True, verbose_name='مقدار جلسات دوره')
 
     class Meta:
         verbose_name = "دوره"  # Singular name for admin
@@ -42,19 +37,36 @@ class Course(models.Model):
         return self.title
     
 class Section(models.Model):
-    name = models.CharField(max_length=63, null=True, blank=True) #or section number
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='sections', null=True, blank=True)
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='sections', null=True, blank=True)
-    students = models.ManyToManyField(Student, related_name='sections', blank=True)
-    capacity = models.IntegerField(null=True, blank=True, default=1)
-    registered = models.IntegerField(null=True, blank=True, default=0)
-    
+
+
+    TYPE = [
+        ('0','اتمام مهلت ثبت نام'),
+        ('1','در حال ثبت نام'),
+        
+    ]
+
+    name = models.CharField(max_length=63, null=True, blank=True, verbose_name='گروه') #or section number
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='sections', null=True, blank=True, verbose_name='دوره')
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='sections', null=True, blank=True, verbose_name='استاد')
+    students = models.ManyToManyField(Student, through='SectionStudent', related_name='sections', verbose_name='دانشجو ها')
+
+    capacity = models.IntegerField(null=True, blank=True, default=1, verbose_name='ظرفیت')
+    registered = models.IntegerField(null=True, blank=True, default=0, verbose_name='ثبت نام شده')
+    section_status = models.CharField(default=1,max_length=1,choices=TYPE, verbose_name='وضعیت')
+
     class Meta:
         verbose_name = "سکشن" 
         verbose_name_plural = "سکشن ها" 
 
     def __str__(self):
         return f'{self.course.title} - {self.teacher} | {self.name}'
+    
+#  THIS IS A INTERMEDIATE CLASS FOR SHOWING STUDENT IN ADMIN PANEL OF SECTION, I COUDNT SHOW THEM DIRECTLY
+#  I HAD TO USE  through='SectionStudent' AND THAT WAS ACHIVABLE WITH AN  Intermediary Model LIKE THIS
+class SectionStudent(models.Model):
+    section = models.ForeignKey(Section, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    date_joined = models.DateField(auto_now_add=True)  # Additional fields
     
 class SectionTimeSlot(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='time_slots')

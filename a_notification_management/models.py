@@ -1,5 +1,5 @@
 from django.db import models
-from a_user_management.models import Person
+from a_user_management.models import Person, Teacher, Employee
 from a_course_management.models import Section
 # Create your models here.
 
@@ -9,7 +9,7 @@ class News(models.Model):
     news_img = models.ImageField(upload_to='News_images/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)  
     updated_at = models.DateTimeField(auto_now=True)   
-    author = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='news', null=True, blank=True)
+    author = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='news', null=True, blank=True)
 
     class Meta:
         verbose_name = "خبر" 
@@ -23,7 +23,7 @@ class Notification(models.Model):
     description = models.TextField(max_length=4095, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)  
     updated_at = models.DateTimeField(auto_now=True)   
-    author = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='notification', null=True, blank=True)
+    author = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='notification', null=True, blank=True)
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='notification', null=True, blank=True)
 
     def __str__(self):
@@ -31,6 +31,6 @@ class Notification(models.Model):
     
     class Meta:
         verbose_name = "اطلاعیه" 
-        verbose_name_plural = "اطلاعه ها" 
+        verbose_name_plural = "اطلاعیه ها" 
     
  

@@ -1,7 +1,7 @@
 import json
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from a_user_management.models import Student, PhoneVerification, Teacher
+from a_user_management.models import Student, PhoneVerification, Teacher, Grade
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -52,6 +52,13 @@ def home(request):
     return render(request,'base.html',context)
 
 def logout_command(request):
+
+    teachers = Teacher.objects.all()
+    for teacher in teachers:
+        if not teacher.password.startswith('pbkdf2_'):  # Assuming using PBKDF2 as the default hashing algorithm
+            teacher.set_password(teacher.password)  # Hash the current password
+            teacher.save()
+    
     logout(request)
     return redirect('student_login_url')
 
@@ -113,9 +120,10 @@ def register(request):
             ageLevel = '2'
 
         if primaryState is None:
-            skillLevel = '0'
+            skillLevel = 0
         else:
-            skillLevel = '1'
+            skillLevel = -1
+        
 
         if verify_code(phone, confirmationCode):
             student = Student.objects.create(
@@ -129,7 +137,7 @@ def register(request):
                 date_of_birth=birthDayDate_formatted,
                 education=education,
                 ageLevel = ageLevel,
-                skillLevel = skillLevel,
+                grade = Grade.objects.get(gradeLevel=skillLevel),
             )
             messages.success(request, 'موفق : اکانت شما ساخته شد.')
 
