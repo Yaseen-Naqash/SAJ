@@ -1,7 +1,10 @@
 from django.db import models
+import jdatetime
 from a_user_management.models import Teacher, Student
 
 # Create your models here.
+
+
 
 class DaysOfWeek(models.TextChoices):
     SATURDAY = 'SAT', 'شنبه'
@@ -53,6 +56,7 @@ class Section(models.Model):
     capacity = models.IntegerField(null=True, blank=True, default=1, verbose_name='ظرفیت')
     registered = models.IntegerField(null=True, blank=True, default=0, verbose_name='ثبت نام شده')
     section_status = models.CharField(default=1,max_length=1,choices=TYPE, verbose_name='وضعیت')
+    session_number = models.IntegerField(null=True, blank=True, default=1, verbose_name=' تعداد جلسات برگزار شده ')
 
     class Meta:
         verbose_name = "سکشن" 
@@ -67,6 +71,9 @@ class SectionStudent(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     date_joined = models.DateField(auto_now_add=True)  # Additional fields
+
+    def __str__(self):
+        return f'{self.student}'
     
 class SectionTimeSlot(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='time_slots')
@@ -82,7 +89,17 @@ class SectionTimeSlot(models.Model):
         return f"{self.section.course.title} | {self.section.teacher} | {self.section.name} | ({self.day_of_week} : {self.timeOfSection})"
 
 
+class Attendance(models.Model):
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='attendances', null=True, blank=True, verbose_name='سکشن')
+    section_student = models.ForeignKey(SectionStudent, on_delete=models.CASCADE, verbose_name='دانشجو')
+    date = models.CharField(max_length=63, null=True, blank=True, verbose_name='تاریخ')  
+    status = models.BooleanField(default=False, verbose_name='وضعیت')
+    grg_date = models.DateField(auto_now_add=True, verbose_name='تاریخ')
+    session = models.CharField(default='جلسه 1', max_length=31, null=True, blank=True, verbose_name='جلسه')
 
+    class Meta:
+        verbose_name = "حضور غیاب ها" 
+        verbose_name_plural = "حضور غیاب" 
 
 
 class Exam(models.Model):
