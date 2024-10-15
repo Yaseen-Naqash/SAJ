@@ -2,6 +2,7 @@ from django.db import models
 import jdatetime
 from a_user_management.models import Teacher, Student
 
+
 # Create your models here.
 
 
@@ -104,8 +105,7 @@ class Attendance(models.Model):
 
 class Exam(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='exam', null=True, blank=True)
-    exam_time = models.DateTimeField() 
-    duration = models.DurationField() 
+    exam_time = models.DateTimeField()
 
     class Meta:
         verbose_name = "آزمون" 

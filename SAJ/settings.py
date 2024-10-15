@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'django_jalali',
+    'jalali_date',
 
     'a_institution_management',
     'a_user_management',
@@ -72,6 +73,9 @@ TEMPLATES = [
         },
     },
 ]
+
+
+
 
 WSGI_APPLICATION = 'SAJ.wsgi.application'
 
@@ -110,6 +114,9 @@ AUTH_USER_MODEL = 'a_user_management.Person'
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'fa-ir'
+
+import locale
+locale.setlocale(locale.LC_ALL, "Persian_Iran.UTF-8")
 
 TIME_ZONE = 'Asia/Tehran'
 

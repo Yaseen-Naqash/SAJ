@@ -40,17 +40,14 @@ class AttendanceInline(admin.TabularInline):
     readonly_fields = ('section_student',)
     ordering = ['-date']
 
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        # Only display records for the current section
-        return qs.filter(section_student__section__teacher=request.user.teacher)
+
 
 @admin.register(Section)
 class SectionAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        if request.user.groups.filter(name='Teacher').exists():
+        if request.user.groups.filter(name='استاد').exists():
             return qs.filter(teacher=request.user.teacher)
         return qs
     
@@ -126,12 +123,17 @@ class SectionAdmin(admin.ModelAdmin):
 
 
     search_fields = [
-        'name', 
-        'teacher',
+        'teacher__first_name', 
+        'teacher__last_name',
+        'course__title',
+        
+
+ 
     ]
     list_filter = (
         'section_status',
         'course',
+        'name',
     )
 
 
@@ -174,7 +176,10 @@ class HomeWorkDocumentAdmin(CustomAdminMixin, admin.ModelAdmin):
 @admin.register(Attendance)
 class AttendanceAdmin(admin.ModelAdmin):
     list_display = ('section_student', 'date', 'status', 'session')
-    list_filter = ('section_student__section', 'grg_date', 'session', 'section')
+
+    #   THIS PART HANDLED VIA get_list_filter METHOD BELOW
+    #   list_filter = ('section_student__section', 'grg_date', 'session', 'section')
+
     search_fields = (
         'section_student__student__first_name',  # Accessing first_name through student
         'section_student__student__last_name',   # Accessing last_name through student
@@ -183,7 +188,33 @@ class AttendanceAdmin(admin.ModelAdmin):
     actions = ['mark_attendance_present']
 
 
-    # Define the custom action
+    # THIS METHOD LIMITS THE QS TO THE TEACHER SECTIONS
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.groups.filter(name='استاد').exists():
+            return qs.filter(section__teacher=request.user.teacher)
+        return qs
+    
+
+    # THIS METHOD LIMITS THE FILTER OPTIONS TO ONLY SHOW OBJECTS IN QS
+    def get_list_filter(self, request):
+        # Override the list_filter to only include options from the filtered queryset
+        qs = self.get_queryset(request)
+
+        # Get distinct values for each filter based on the queryset
+        sections = qs.values_list('section', flat=True).distinct()
+        grg_dates = qs.values_list('grg_date', flat=True).distinct()
+        sessions = qs.values_list('session', flat=True).distinct()
+
+        # Create custom filters for the available objects in the queryset
+        return [
+            ('section_student__section', admin.RelatedOnlyFieldListFilter),
+            ('grg_date'),
+            ('session', admin.AllValuesFieldListFilter),
+            ('section', admin.RelatedOnlyFieldListFilter),
+        ]
+    
+    # THIS METHOD SUBMITS attendance FOR SELECTED STUDENTS
     def mark_attendance_present(self, request, queryset):
         updated = queryset.update(status=True)
         self.message_user(request, f'حضور برای دانشجو های انتخاب شده ثبت شد ')

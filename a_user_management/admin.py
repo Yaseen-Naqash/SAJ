@@ -1,8 +1,7 @@
 from django.contrib import admin
 from .models import Student, Teacher, Person, PhoneVerification, Grade, Employee
 from a_course_management.models import Section, HomeWork, HomeWorkDocument, Exam, ExamDocument
-from django_jalali.admin.filters import JDateFieldListFilter
-import django_jalali.admin as jadmin
+import django_jalali.admin as jadmin # jalali date picker
 from django.db import models  
 from django.contrib.auth.models import Group
 
@@ -76,8 +75,9 @@ class CustomAdminMixin:
                 return ['last_name', 'code_melli']  # For Teachers, field3 and field4 are readonly
             
         
-        # Default: make all fields readonly if no specific group logic applies
-        return self.fields
+        # Default: make all fields editable
+
+        return []  
 
 
     def get_fieldsets(self, request, obj=None):
@@ -128,9 +128,12 @@ class StudentAdmin(CustomAdminMixin, admin.ModelAdmin):
 
     search_fields = ['first_name', 'last_name', 'phone', 'code_melli']  # Define searchable fields for Student
 
+    # THIS IS WHAT TO APPLY TO ADD A JALALI DATE PICKER IN ADMIN PANEL
     formfield_overrides = {
         models.DateField: {'widget': jadmin.widgets.AdminjDateWidget},  # Use Jalali date picker in admin
     }
+
+
     inlines = [SectionStudentInline]
 
 
