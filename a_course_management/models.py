@@ -69,12 +69,30 @@ class Section(models.Model):
 #  THIS IS A INTERMEDIATE CLASS FOR SHOWING STUDENT IN ADMIN PANEL OF SECTION, I COUDNT SHOW THEM DIRECTLY
 #  I HAD TO USE  through='SectionStudent' AND THAT WAS ACHIVABLE WITH AN  Intermediary Model LIKE THIS
 class SectionStudent(models.Model):
-    section = models.ForeignKey(Section, on_delete=models.CASCADE)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+
+    ACTIVITY = [
+        ('0','در حال تحصیل'),
+        ('1','پایان دوره'),
+    ]
+
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, verbose_name='گروه')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name='دانشجو')
+    activity = models.CharField(default=0,max_length=1,choices=ACTIVITY, verbose_name="وضعیت دانشجو در این دوره")
+
     date_joined = models.DateField(auto_now_add=True)  # Additional fields
+    class_score = models.DecimalField(default=0, max_digits=5, decimal_places=2, null=True, blank=True, verbose_name='نمره کلاسی')
+    exam_score = models.DecimalField(default=0, max_digits=5, decimal_places=2, null=True, blank=True, verbose_name='نمره پایانی')
+
+
+
+
+
+    class Meta:
+        verbose_name = "دوره برای دانشجو" 
+        verbose_name_plural = "دوره های دانشجو ها" 
 
     def __str__(self):
-        return f'{self.student}'
+        return f'{self.student} در {self.section}'
     
 class SectionTimeSlot(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='time_slots')
@@ -104,22 +122,28 @@ class Attendance(models.Model):
 
 
 class Exam(models.Model):
-    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='exam', null=True, blank=True)
-    exam_time = models.DateTimeField()
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='exam', null=True, blank=True, verbose_name='گروه')
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='exams', null=True, blank=True, verbose_name='استاد')
+
+    exam_time = models.DateTimeField(verbose_name='تاریخ آزمون')
 
     class Meta:
         verbose_name = "آزمون" 
         verbose_name_plural = " آزمون ها" 
     
     def __str__(self):
-        return f'آزمون برای {self.section.course.title} on {self.exam_time}'
+        return f'آزمون برای {self.section.course.title} | {self.teacher} | {self.section.name}'
 
 class HomeWork(models.Model):
-    title = models.CharField(max_length=127, null=True, blank=True)
-    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='homeworks', null=True, blank=True)
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='homeworks', null=True, blank=True)
+    title = models.CharField(max_length=127, null=True, blank=True, verbose_name='عنوان')
+    description = models.TextField(max_length=2047, null=True , blank=True, verbose_name='توضیحات')
+    pdf = models.FileField(upload_to='GivenHomeWorks/files/', verbose_name='فایل پیوست', null=True , blank=True)  # 'documents/pdfs/' is the upload path
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='homeworks', null=True, blank=True, verbose_name='گروه')
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='homeworks', null=True, blank=True, verbose_name='استاد')
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)  
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)      
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    expire_time = models.DateTimeField(verbose_name='مهلت تحویل')
+
     
     class Meta:
         verbose_name = "تمرین" 
@@ -133,9 +157,12 @@ class HomeWork(models.Model):
 class HomeWorkDocument(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='homeWorks', null=True, blank=True)
     homeWork = models.ForeignKey(HomeWork,on_delete=models.CASCADE, related_name='documents', null=True, blank=True)
-    pdf = models.FileField(upload_to='homeWorks/pdfs/')  # 'documents/pdfs/' is the upload path
+    pdf = models.FileField(upload_to='HomeWorks/files/')  # 'documents/pdfs/' is the upload path
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    seen = models.BooleanField(default=False)
+    score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
     
     class Meta:
         verbose_name = "پاسخ تمرین" 

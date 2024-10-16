@@ -7,7 +7,9 @@ from django.shortcuts import redirect
 from django.contrib import admin
 from .models import Course, Section, SectionStudent, SectionTimeSlot, Exam, HomeWork, HomeWorkDocument, ExamDocument, Degree, Attendance
 from a_user_management.admin import CustomAdminMixin
-from django_jalali.forms import jdatetime, jDateInput
+from django_jalali.forms import jdatetime
+import django_jalali.admin as jadmin # jalali date picker
+from django.db import models  
 
 
 
@@ -126,9 +128,6 @@ class SectionAdmin(admin.ModelAdmin):
         'teacher__first_name', 
         'teacher__last_name',
         'course__title',
-        
-
- 
     ]
     list_filter = (
         'section_status',
@@ -139,6 +138,37 @@ class SectionAdmin(admin.ModelAdmin):
 
     inlines = [SectionTimeSlotInline]
 
+
+
+@admin.register(SectionStudent)
+class SectionStudentAdmin(admin.ModelAdmin):
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.groups.filter(name='استاد').exists():
+            return qs.filter(teacher=request.user.teacher)
+        return qs
+    
+    list_display= [
+        'student',
+        'section',
+        'activity',
+        'class_score',
+        'exam_score',
+    ]
+    search_fields = [
+        'student__first_name', 
+        'student__last_name',
+        'section__name',
+        'section__teacher__first_name',
+        'section__teacher__last_name',
+    ]
+
+    list_filter = (
+        'activity',
+        'section__course',
+        'section',
+    )
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
@@ -153,7 +183,9 @@ class DegreeAdmin(admin.ModelAdmin):
 
 @admin.register(Exam)
 class ExamAdmin(admin.ModelAdmin):
-    pass
+    formfield_overrides = {
+        models.DateTimeField: {'widget': jadmin.widgets.AdminSplitjDateTime},  # Use Jalali date picker in admin
+    }
 
 @admin.register(ExamDocument)
 class ExamDocumentAdmin(admin.ModelAdmin):
@@ -165,8 +197,9 @@ class ExamDocumentAdmin(admin.ModelAdmin):
 # TESTING GROUPS LIMITATIONS WITH CustomAdminMixin
 @admin.register(HomeWork)
 class HomeWorkAdmin(CustomAdminMixin, admin.ModelAdmin):
-    # Any additional configurations for HomeWorkAdmin
-    pass
+    formfield_overrides = {
+        models.DateTimeField: {'widget': jadmin.widgets.AdminSplitjDateTime},  # Use Jalali date picker in admin
+    }
 
 @admin.register(HomeWorkDocument)
 class HomeWorkDocumentAdmin(CustomAdminMixin, admin.ModelAdmin):
@@ -175,7 +208,7 @@ class HomeWorkDocumentAdmin(CustomAdminMixin, admin.ModelAdmin):
 
 @admin.register(Attendance)
 class AttendanceAdmin(admin.ModelAdmin):
-    list_display = ('section_student', 'date', 'status', 'session')
+    list_display = ('section_student__student','section' , 'date', 'status', 'session')
 
     #   THIS PART HANDLED VIA get_list_filter METHOD BELOW
     #   list_filter = ('section_student__section', 'grg_date', 'session', 'section')

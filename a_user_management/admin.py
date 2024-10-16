@@ -8,7 +8,7 @@ from django.contrib.auth.models import Group
 
 class SectionStudentInline(admin.TabularInline):
     model = Section.students.through  
-    extra = 1
+    extra = 0
 
 
 # TEACHER
