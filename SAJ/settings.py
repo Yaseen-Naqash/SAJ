@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'a_user_management',
     'a_course_management',
     'a_notification_management',
+    'a_financial_management',
 ]
 
 MIDDLEWARE = [

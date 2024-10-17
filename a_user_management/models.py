@@ -13,6 +13,9 @@ class Person(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
     updated_at = models.DateTimeField(auto_now=True)       # Automatically updated on every save
     profile_image = models.ImageField(upload_to='profile_images/', null=True, blank=True, verbose_name="تصویر پروفایل")
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
     
 
 class PhoneVerification(models.Model):

@@ -83,8 +83,8 @@ class SectionStudent(models.Model):
     class_score = models.DecimalField(default=0, max_digits=5, decimal_places=2, null=True, blank=True, verbose_name='نمره کلاسی')
     exam_score = models.DecimalField(default=0, max_digits=5, decimal_places=2, null=True, blank=True, verbose_name='نمره پایانی')
 
-
-
+    # dept قرض
+    # payments پرداختی
 
 
     class Meta:
