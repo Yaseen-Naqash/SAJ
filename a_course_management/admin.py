@@ -143,11 +143,7 @@ class SectionAdmin(admin.ModelAdmin):
 @admin.register(SectionStudent)
 class SectionStudentAdmin(admin.ModelAdmin):
     
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        if request.user.groups.filter(name='استاد').exists():
-            return qs.filter(teacher=request.user.teacher)
-        return qs
+
     
     list_display= [
         'student',

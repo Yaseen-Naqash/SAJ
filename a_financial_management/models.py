@@ -1,7 +1,8 @@
 from django.db import models
 import uuid
 from a_user_management.models import Person
-
+from django.utils import timezone
+from datetime import timedelta
 import jdatetime
 import random
 # Create your models here.
@@ -12,6 +13,53 @@ def generate_custom_id():
     # Format the ID string using the Jalali date and time
     custom_id = f"APh.R-y{now.year}-mo{now.month:02d}-d{now.day:02d}-h{now.hour:02d}-mi{now.minute:02d}-s{now.second:02d}-{random.randint(1000,9999)}"
     return custom_id
+
+
+
+
+
+class ReceiptQuerySet(models.QuerySet):
+    def today(self):
+        today = timezone.now().date()
+        return self.filter(created_at__date=today)
+
+    def yesterday(self):
+        yesterday = timezone.now().date() - timedelta(days=1)
+        return self.filter(created_at__date=yesterday)
+
+    def last_7_days(self):
+        return self.filter(created_at__date__gte=timezone.now() - timedelta(days=7))
+
+    def last_month(self):
+        # Get today's date
+        today = timezone.now().date()
+        
+        # Get the first day of the current month
+        first_day_of_current_month = today.replace(day=1)
+        
+        # Subtract one day to get the last day of the previous month
+        last_day_of_last_month = first_day_of_current_month - timedelta(days=1)
+        
+        # Now get the first day of that last month
+        first_day_of_last_month = last_day_of_last_month.replace(day=1)
+        
+        # Filter receipts for the previous month
+        return self.filter(created_at__date__gte=first_day_of_last_month, created_at__date__lte=last_day_of_last_month)
+
+    def last_2_months(self):
+        today = timezone.now().date()
+        first_day_of_current_month = today.replace(day=1)
+        last_month_end = first_day_of_current_month - timedelta(days=1)
+        two_months_ago_start = last_month_end.replace(day=1) - timedelta(days=last_month_end.day)
+        return self.filter(created_at__date__gte=two_months_ago_start)
+
+    def last_6_months(self):
+        six_months_ago = timezone.now() - timedelta(days=6 * 30)
+        return self.filter(created_at__date__gte=six_months_ago)
+
+    def last_year(self):
+        today = timezone.now().date()
+        return self.filter(created_at__date__gte=today.replace(year=today.year - 1))
 
 class Receipt(models.Model):
 
@@ -34,7 +82,7 @@ class Receipt(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     jdate = models.CharField(max_length=15, default=jdatetime.date.today().strftime('%Y/%m/%d'), verbose_name='تاریخ')
 
-
+    objects = ReceiptQuerySet.as_manager()
     class Meta:
         verbose_name = "رسید مالی"  # Singular name for admin
         verbose_name_plural = "رسید های مالی"  # Plural name for admin

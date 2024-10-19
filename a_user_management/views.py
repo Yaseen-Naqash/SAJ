@@ -53,11 +53,11 @@ def home(request):
 
 def logout_command(request):
 
-    teachers = Teacher.objects.all()
-    for teacher in teachers:
-        if not teacher.password.startswith('pbkdf2_'):  # Assuming using PBKDF2 as the default hashing algorithm
-            teacher.set_password(teacher.password)  # Hash the current password
-            teacher.save()
+    # teachers = Teacher.objects.all()
+    # for teacher in teachers:
+    #     if not teacher.password.startswith('pbkdf2_'):  # Assuming using PBKDF2 as the default hashing algorithm
+    #         teacher.set_password(teacher.password)  # Hash the current password
+    #         teacher.save()
     
     logout(request)
     return redirect('student_login_url')

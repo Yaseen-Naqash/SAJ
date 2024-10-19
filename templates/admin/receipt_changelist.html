@@ -1,0 +1,12 @@
+{% extends "admin/change_list.html" %}
+
+{% block content %}
+<div class="receipts-summary">
+    <h3>مجموع مبالغ واریزی</h3>
+    <ul>
+        <li>جمع کل پرداختی های لیست : {{ total }} تومان</li>
+
+    </ul>
+</div>
+{{ block.super }}
+{% endblock %}
