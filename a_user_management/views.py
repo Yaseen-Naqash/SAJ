@@ -120,9 +120,9 @@ def register(request):
             ageLevel = '2'
 
         if primaryState is None:
-            skillLevel = 0
+            skillLevel = 1
         else:
-            skillLevel = -1
+            skillLevel = 0
         
 
         if verify_code(phone, confirmationCode):

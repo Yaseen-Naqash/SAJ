@@ -1,0 +1,42 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/the-datepicker.css' %}">
+<script src="{% static 'js/the-datepicker.js' %}"></script>
+
+<div>
+    
+    <form method="GET" action="">
+        <h3> بر اساس بازه زمانی</h3>
+        <div class="user-box">
+            <label for="id_start_date">از تاریخ:</label>
+
+            <input type="text" id="start-date-input" name="start_date" >
+        </div>
+        <br>
+
+        <div class="user-box">
+            <label for="id_end_date">تا تاریخ:</label>
+
+            <input type="text" id="end-date-input" name="end_date" >
+        </div>
+
+        <br>
+        <input type="submit" value="Filter">
+    </form>
+</div>
+<script>
+    // Initialize date picker for the start date input
+    const startDateInput = document.getElementById('start-date-input');
+    const startDatePicker = new TheDatepicker.Datepicker(startDateInput);
+    startDatePicker.options.setInitialDate("1403-7-11"); // Example date
+    startDatePicker.reset();
+    startDatePicker.render();
+
+    // Initialize date picker for the end date input
+    const endDateInput = document.getElementById('end-date-input');
+    const endDatePicker = new TheDatepicker.Datepicker(endDateInput);
+    endDatePicker.options.setInitialDate("1403-7-11"); // Example date
+    endDatePicker.reset();
+    endDatePicker.render();
+
+  </script>
