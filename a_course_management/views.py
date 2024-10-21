@@ -17,8 +17,7 @@ def my_courses(request):
     if hasattr(request.user, 'student'):
         student = request.user.student  
 
-    sections = student.sections.all()
-    print(sections)
+        sections = student.sections.all()
 
     context = {'sections':sections}
     return render(request,'my_courses.html',context)

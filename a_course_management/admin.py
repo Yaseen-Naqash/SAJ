@@ -6,20 +6,17 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.contrib import admin
 from .models import Course, Section, SectionStudent, SectionTimeSlot, Exam, HomeWork, HomeWorkDocument, ExamDocument, Degree, Attendance
-from a_user_management.admin import CustomAdminMixin
 from django_jalali.forms import jdatetime
 import django_jalali.admin as jadmin # jalali date picker
 from django.db import models  
 
-
+from django.contrib import admin
+from .models import Course, Section
+from a_user_management.models import Student
 
 # Register your models here.
 admin.site.register(SectionTimeSlot)
 
-from django.contrib import admin
-from .models import Course, Section
-
-from a_user_management.models import Student
 
 class StudentInline(admin.TabularInline):
     model = Student
@@ -33,7 +30,6 @@ class SectionTimeSlotInline(admin.TabularInline):
     model = SectionTimeSlot
     extra = 1  
 
-
 class AttendanceInline(admin.TabularInline):
     model = Attendance
     extra = 1
@@ -42,16 +38,9 @@ class AttendanceInline(admin.TabularInline):
     readonly_fields = ('section_student',)
     ordering = ['-date']
 
-
-
 @admin.register(Section)
 class SectionAdmin(admin.ModelAdmin):
 
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        if request.user.groups.filter(name='استاد').exists():
-            return qs.filter(teacher=request.user.teacher)
-        return qs
     
     list_display= [
         'course',
@@ -138,8 +127,6 @@ class SectionAdmin(admin.ModelAdmin):
 
     inlines = [SectionTimeSlotInline]
 
-
-
 @admin.register(SectionStudent)
 class SectionStudentAdmin(admin.ModelAdmin):
     
@@ -170,9 +157,6 @@ class SectionStudentAdmin(admin.ModelAdmin):
 class CourseAdmin(admin.ModelAdmin):
     inlines = [SectionInline]
 
-
-
-
 @admin.register(Degree)
 class DegreeAdmin(admin.ModelAdmin):
     pass
@@ -190,15 +174,14 @@ class ExamDocumentAdmin(admin.ModelAdmin):
 
 
 
-# TESTING GROUPS LIMITATIONS WITH CustomAdminMixin
 @admin.register(HomeWork)
-class HomeWorkAdmin(CustomAdminMixin, admin.ModelAdmin):
+class HomeWorkAdmin(admin.ModelAdmin):
     formfield_overrides = {
         models.DateTimeField: {'widget': jadmin.widgets.AdminSplitjDateTime},  # Use Jalali date picker in admin
     }
 
 @admin.register(HomeWorkDocument)
-class HomeWorkDocumentAdmin(CustomAdminMixin, admin.ModelAdmin):
+class HomeWorkDocumentAdmin(admin.ModelAdmin):
     pass
 
 
