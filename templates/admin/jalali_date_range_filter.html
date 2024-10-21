@@ -3,9 +3,9 @@
 <link rel="stylesheet" href="{% static 'css/the-datepicker.css' %}">
 <script src="{% static 'js/the-datepicker.js' %}"></script>
 
-<div>
+<div style="width: 100%;">
     
-    <form method="GET" action="">
+    <form method="GET" action="" id="date-filter-form" style="width: 100%; padding: 15px;">
         <h3> بر اساس بازه زمانی</h3>
         <div class="user-box">
             <label for="id_start_date">از تاریخ:</label>
@@ -21,22 +21,25 @@
         </div>
 
         <br>
-        <input type="submit" value="Filter">
+        <input style="margin-right: 28%;" type="submit" value="جستوجو">
     </form>
 </div>
 <script>
     // Initialize date picker for the start date input
     const startDateInput = document.getElementById('start-date-input');
     const startDatePicker = new TheDatepicker.Datepicker(startDateInput);
-    startDatePicker.options.setInitialDate("1403-7-11"); // Example date
+    startDatePicker.options.setInitialDate(""); // Example date
     startDatePicker.reset();
     startDatePicker.render();
 
     // Initialize date picker for the end date input
     const endDateInput = document.getElementById('end-date-input');
     const endDatePicker = new TheDatepicker.Datepicker(endDateInput);
-    endDatePicker.options.setInitialDate("1403-7-11"); // Example date
+    endDatePicker.options.setInitialDate(""); // Example date
     endDatePicker.reset();
     endDatePicker.render();
+
+
+    
 
   </script>
