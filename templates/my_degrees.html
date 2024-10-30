@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    Aphome | دوره های من
+Aphome | مدارک من
 {% endblock %}
 {% load static %}
-{% load jformat %}
+
 
 {% block extra_css %}
     <style></style>
@@ -15,7 +15,7 @@
 
 <div class="my-courses">
 
-    {% for section in sections %}
+    {% for degree in degrees %}
     <div class="my-course" style="height: fit-content;">
         {% if section.course.course_img %}
         <img src="{{ section.course.course_img.url }}" alt="{{ section.course.title }}">
@@ -50,8 +50,6 @@
     </div>
     {% endfor %}
 </div>
-
-
 {% endblock %}
 
 

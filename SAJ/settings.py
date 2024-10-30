@@ -120,7 +120,11 @@ import locale
 locale.setlocale(locale.LC_ALL, "Persian_Iran.UTF-8")
 
 TIME_ZONE = 'Asia/Tehran'
+DATE_FORMAT = 'Y/m/d'  # For '2024/08/22'
+# Or, alternatively, for '2024-08-22'
+# DATE_FORMAT = 'Y-m-d'
 
+SHORT_DATE_FORMAT = 'Y/m/d'
 USE_I18N = True
 
 USE_TZ = True

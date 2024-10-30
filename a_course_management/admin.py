@@ -85,7 +85,7 @@ class SectionAdmin(admin.ModelAdmin):
             date = jalali_date.strftime('%Y/%m/%d')
             
 
-        session_value = f'جلسه {section.session_number}'
+        session_value = f'جلسه {section.session_number+1}'
         for student in section.students.all():
             section_student = SectionStudent.objects.get(section=section, student=student)
             attendance, created = Attendance.objects.get_or_create(
@@ -199,13 +199,6 @@ class AttendanceAdmin(admin.ModelAdmin):
     )
     actions = ['mark_attendance_present']
 
-
-    # THIS METHOD LIMITS THE QS TO THE TEACHER SECTIONS
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        if request.user.groups.filter(name='استاد').exists():
-            return qs.filter(section__teacher=request.user.teacher)
-        return qs
     
 
     # THIS METHOD LIMITS THE FILTER OPTIONS TO ONLY SHOW OBJECTS IN QS

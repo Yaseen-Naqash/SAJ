@@ -57,7 +57,7 @@ class Section(models.Model):
     capacity = models.IntegerField(null=True, blank=True, default=1, verbose_name='ظرفیت')
     registered = models.IntegerField(null=True, blank=True, default=0, verbose_name='ثبت نام شده')
     section_status = models.CharField(default=1,max_length=1,choices=TYPE, verbose_name='وضعیت')
-    session_number = models.IntegerField(null=True, blank=True, default=1, verbose_name=' تعداد جلسات برگزار شده ')
+    session_number = models.IntegerField(null=True, blank=True, default=0, verbose_name=' تعداد جلسات برگزار شده ')
 
     class Meta:
         verbose_name = "سکشن" 
@@ -68,6 +68,8 @@ class Section(models.Model):
     
 #  THIS IS A INTERMEDIATE CLASS FOR SHOWING STUDENT IN ADMIN PANEL OF SECTION, I COUDNT SHOW THEM DIRECTLY
 #  I HAD TO USE  through='SectionStudent' AND THAT WAS ACHIVABLE WITH AN  Intermediary Model LIKE THIS
+#  IT ALSO REPERESENT STUDENT IN SECTION LINK THAT CONTAINS SOME INFORMATION UNIQUE TO STUDENT AND SECTION 
+#  THAT HES BELONG TO LIKE HIS SCORE IN THAT SECTION
 class SectionStudent(models.Model):
 
     ACTIVITY = [
@@ -76,7 +78,7 @@ class SectionStudent(models.Model):
     ]
 
     section = models.ForeignKey(Section, on_delete=models.CASCADE, verbose_name='گروه')
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name='دانشجو')
+    student = models.ForeignKey(Student, related_name='section_student', on_delete=models.CASCADE, verbose_name='دانشجو')
     activity = models.CharField(default=0,max_length=1,choices=ACTIVITY, verbose_name="وضعیت دانشجو در این دوره")
 
     date_joined = models.DateField(auto_now_add=True)  # Additional fields
@@ -107,10 +109,10 @@ class SectionTimeSlot(models.Model):
     def __str__(self):
         return f"{self.section.course.title} | {self.section.teacher} | {self.section.name} | ({self.day_of_week} : {self.timeOfSection})"
 
-
+    
 class Attendance(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='attendances', null=True, blank=True, verbose_name='سکشن')
-    section_student = models.ForeignKey(SectionStudent, on_delete=models.CASCADE, verbose_name='دانشجو')
+    section_student = models.ForeignKey(SectionStudent,related_name='attendances', on_delete=models.CASCADE, verbose_name='دانشجو')
     date = models.CharField(max_length=63, null=True, blank=True, verbose_name='تاریخ')  
     status = models.BooleanField(default=False, verbose_name='وضعیت')
     grg_date = models.DateField(auto_now_add=True, verbose_name='تاریخ')
@@ -191,7 +193,7 @@ class ExamDocument(models.Model):
 class Degree(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='degrees', null=True, blank=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='degrees', null=True, blank=True)
-
+    pdf = models.FileField(upload_to='Degrees/', verbose_name='فایل پیوست مدرک', null=True , blank=True)  # 'documents/pdfs/' is the upload path
     score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True) 
     updated_at = models.DateTimeField(auto_now=True)

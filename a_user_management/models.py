@@ -93,7 +93,7 @@ class Student(Person):
         ('1','نوجوان'),
         ('2','بزرگسال'),
     ]
-
+    balance = models.IntegerField(default=0, null=True, verbose_name='(تومان) مبلغ')
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='students', null=True, blank=True, verbose_name="شعبه")
     grade = models.ForeignKey(Grade,on_delete=models.CASCADE, related_name='students', null=True, blank=True, verbose_name="سطح")
     activity = models.CharField(default=0,max_length=1,choices=ACTIVITY, verbose_name="وضعیت")
