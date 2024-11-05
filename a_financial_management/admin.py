@@ -112,27 +112,30 @@ class CustomDateFilter(SimpleListFilter):
 
 @admin.register(Receipt)
 class ReceiptAdmin(admin.ModelAdmin):
-
+    exclude = ('amount',)
+    autocomplete_fields = ('payer',)
     list_display = (
-        'title', 
-        'transaction_id', 
-        'amount',
-        'payment_method',
-        'sender_account',
         'payer', 
+        'transaction_id', 
+        'formatted_amount',
+        'payment_method',
         'jdate',
+        'confirmed',
     )
     
     list_filter = (
         'payment_method',
+        'confirmed',
+
         CustomDateFilter,
         JalaliDateRangeFilter,
         
     )
 
+    search_fields = ['title', 'payer__first_name',] 
 
-    search_fields = ['title', 'payer', 'sender_account', 'jdate']  # Define searchable fields for Student
-    change_list_template = 'admin/receipt_changelist.html'  # Custom template to show the totals
+    #  CALCULATE THE SUM OF THE QUERY SET AMOPUNT AND SHOW IT AT TOP OF THE PAGE USING admin/receipt_changelist.html
+    change_list_template = 'admin/receipt_changelist.html' 
 
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(request, extra_context=extra_context)
@@ -152,9 +155,38 @@ class ReceiptAdmin(admin.ModelAdmin):
             # Add the total to extra_context and update the response context
             if extra_context is None:
                 extra_context = {}
-            extra_context['total'] = total
+            extra_context['total'] = "{:,}".format(total)
+
             response.context_data.update(extra_context)
 
             
 
         return response
+    
+    actions = ['mark_confirmed_status']
+
+    def mark_confirmed_status(self, request, queryset):
+        updated = queryset.update(confirmed=True)
+        self.message_user(request, f'رسید های ثبت شده تایید شد')
+    
+    mark_confirmed_status.short_description = 'تایید رسید ها'
+
+    # inserts comma for numbers in amount filed
+    class Media:
+        js = ('/static/js/admin/admin_price_format.js',)
+    
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        form_field = super().formfield_for_dbfield(db_field, **kwargs)
+        if db_field.name == 'formatted_amount':
+            form_field.widget.attrs.update({'class': 'comma-add'})
+        return form_field
+    
+    # pre fill the payer field with the sender request data 
+    def get_changeform_initial_data(self, request):
+        initial_data = super().get_changeform_initial_data(request)
+        payer_id = request.GET.get('payer')
+        if payer_id:
+            initial_data['payer'] = payer_id
+        return initial_data
+
+

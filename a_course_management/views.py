@@ -1,5 +1,9 @@
-from django.shortcuts import get_object_or_404, render
-from .models import Course, Degree
+from django.shortcuts import get_object_or_404, render, redirect
+from .models import Course, Degree, Section
+from a_user_management.models import Student
+
+
+from django.contrib.admin.views.decorators import staff_member_required
 # Create your views here.
 def courses(request):
     courses = Course.objects.all()
@@ -31,3 +35,4 @@ def my_degrees(request):
     degrees = Degree.objects.filter(student = student)
     
     return render(request, 'my_degrees.html')
+

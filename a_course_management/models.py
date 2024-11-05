@@ -7,14 +7,6 @@ from a_user_management.models import Teacher, Student
 
 
 
-class DaysOfWeek(models.TextChoices):
-    SATURDAY = 'SAT', 'شنبه'
-    SUNDAY = 'SUN', 'یکشنبه'
-    MONDAY = 'MON', 'دوشنبه'
-    TUESDAY = 'TUE', 'سه شنبه'
-    WEDNESDAY = 'WED', 'چهارشنبه'
-    THURSDAY = 'THU', 'پنجشنبه'
-    FRIDAY = 'FRI', 'جمعه'
 
 
 class Course(models.Model):
@@ -25,13 +17,15 @@ class Course(models.Model):
     ]
 
 
-    title = models.CharField(max_length=255, null=True, blank=True, verbose_name='نام دوره')
-    description = models.TextField(max_length=2047, null=True , blank=True, verbose_name='توضیحات')
+    title = models.CharField(max_length=255, null=True, verbose_name='نام دوره')
     prerequisites = models.ManyToManyField('Course', related_name='required_for',blank=True, verbose_name='پیشنیاز ها') # math101.required_for.all()  # Returns [math102]
-    course_img = models.ImageField(upload_to='Course_images/', null=True, blank=True, verbose_name='تصویر دوره')
-    price = models.CharField(max_length=127, null=True, blank=True, verbose_name='قیمت ثبت نام')
+    course_img = models.ImageField(upload_to='Course_images/', null=True, verbose_name='تصویر دوره')
+    price = models.CharField(max_length=127, null=True, verbose_name='قیمت ثبت نام به تومان')
     installment = models.CharField(default=0,max_length=1,choices=INSTALLMENT, null=True, blank=True, verbose_name='اقساط')
     courseDuration = models.CharField(max_length=127, null=True , blank=True, verbose_name='مقدار جلسات دوره')
+
+    course_hours = models.IntegerField(default=10, null=True, verbose_name='تعداد ساعت دوره')
+    description = models.TextField(max_length=2047, null=True , blank=True, verbose_name='توضیحات')
 
     class Meta:
         verbose_name = "دوره"  # Singular name for admin
@@ -49,6 +43,13 @@ class Section(models.Model):
         
     ]
 
+    GENDER = [
+        ('0','دخنر'),
+        ('1','پسر'),
+        ('2','مختلط'),
+
+    ]
+
     name = models.CharField(max_length=63, null=True, blank=True, verbose_name='گروه') #or section number
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='sections', null=True, blank=True, verbose_name='دوره')
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='sections', null=True, blank=True, verbose_name='استاد')
@@ -58,6 +59,7 @@ class Section(models.Model):
     registered = models.IntegerField(null=True, blank=True, default=0, verbose_name='ثبت نام شده')
     section_status = models.CharField(default=1,max_length=1,choices=TYPE, verbose_name='وضعیت')
     session_number = models.IntegerField(null=True, blank=True, default=0, verbose_name=' تعداد جلسات برگزار شده ')
+    gender = models.CharField(max_length=1, null=True, blank=True, choices=GENDER, verbose_name="جنسیت")
 
     class Meta:
         verbose_name = "سکشن" 
@@ -70,6 +72,7 @@ class Section(models.Model):
 #  I HAD TO USE  through='SectionStudent' AND THAT WAS ACHIVABLE WITH AN  Intermediary Model LIKE THIS
 #  IT ALSO REPERESENT STUDENT IN SECTION LINK THAT CONTAINS SOME INFORMATION UNIQUE TO STUDENT AND SECTION 
 #  THAT HES BELONG TO LIKE HIS SCORE IN THAT SECTION
+
 class SectionStudent(models.Model):
 
     ACTIVITY = [
@@ -97,12 +100,24 @@ class SectionStudent(models.Model):
         return f'{self.student} در {self.section}'
     
 class SectionTimeSlot(models.Model):
-    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='time_slots')
-    day_of_week = models.CharField(max_length=3, choices=DaysOfWeek.choices)  # Store the selected day
-    timeOfSection = models.CharField(max_length=127, null=True, blank=True)
-    place = models.CharField(max_length=63, null=True, blank=True)
+
+    DAYS_OF_WEEK = [
+        ('0','شنبه'),
+        ('1','یکشنبه'),
+        ('2','دوشنبه'),
+        ('3','سه شنبه'),
+        ('4','چهارشنبه'),
+        ('5','پنجشنبه'),
+        ('6','جمعه'),
+        
+    ]
+
+
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='time_slots', verbose_name='گروه')
+    day_of_week = models.CharField(max_length=1, choices=DAYS_OF_WEEK, verbose_name='روز')  # Store the selected day
+    timeOfSection = models.CharField(max_length=127, null=True, verbose_name='زمان')
+    place = models.CharField(max_length=63, null=True, verbose_name='مکان')
     class Meta:
-        unique_together = ('section', 'day_of_week')  # u cant have two time slot in same day
         verbose_name = "زمان سکشن" 
         verbose_name_plural = "زمان سکشن ها" 
 
@@ -138,13 +153,13 @@ class Exam(models.Model):
 
 class HomeWork(models.Model):
     title = models.CharField(max_length=127, null=True, blank=True, verbose_name='عنوان')
-    description = models.TextField(max_length=2047, null=True , blank=True, verbose_name='توضیحات')
     pdf = models.FileField(upload_to='GivenHomeWorks/files/', verbose_name='فایل پیوست', null=True , blank=True)  # 'documents/pdfs/' is the upload path
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='homeworks', null=True, blank=True, verbose_name='گروه')
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='homeworks', null=True, blank=True, verbose_name='استاد')
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)  
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     expire_time = models.DateTimeField(verbose_name='مهلت تحویل')
+    description = models.TextField(max_length=2047, null=True , blank=True, verbose_name='توضیحات')
 
     
     class Meta:
@@ -198,6 +213,9 @@ class Degree(models.Model):
     created_at = models.DateTimeField(auto_now_add=True) 
     updated_at = models.DateTimeField(auto_now=True)
 
+    course_hours = models.IntegerField(default=10, null=True, verbose_name='تعداد ساعت دوره')
+    serial = models.CharField(max_length=127, null=True, verbose_name='شماره سریال')
+    j_create_date = models.CharField(max_length=15, default=jdatetime.date.today().strftime('%Y/%m/%d'), verbose_name='تاریخ صدور')
 
     class Meta:
         verbose_name = "مدرک" 

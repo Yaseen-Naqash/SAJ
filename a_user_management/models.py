@@ -5,11 +5,11 @@ import random
 from django.utils import timezone
 
 class Person(AbstractUser):
-    code_melli = models.CharField(max_length=10, null=True, blank=True, verbose_name="کد ملی")
-    phone = models.CharField(max_length=11, null=True, unique=True, blank=True, verbose_name="تلفن همراه")
+    code_melli = models.CharField(max_length=10, null=True, verbose_name="کد ملی")
+    phone = models.CharField(max_length=11, null=True, unique=True, verbose_name="تلفن همراه")
     phone2 = models.CharField(max_length=11, null=True, unique=True, blank=True, verbose_name="تلفن همراه 2")
 
-    date_of_birth = models.DateField(null=True, blank=True, verbose_name="تاریخ تولد")
+    date_of_birth = models.DateField(null=True, verbose_name="تاریخ تولد")
     created_at = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
     updated_at = models.DateTimeField(auto_now=True)       # Automatically updated on every save
     profile_image = models.ImageField(upload_to='profile_images/', null=True, blank=True, verbose_name="تصویر پروفایل")
@@ -60,13 +60,13 @@ class Teacher(Person):
 
 
 class Grade(models.Model):
-    title = models.CharField(max_length=127, null=True, blank=True)
+    title = models.CharField(max_length=127, null=True)
     gradeLevel = models.IntegerField(default=0)
     
 
     class Meta:
-        verbose_name = "سطح"  # Singular name for admin
-        verbose_name_plural = "سطوح"  # Plural name for admin
+        verbose_name = "سطح" 
+        verbose_name_plural = "سطوح"
     def __str__(self):
         return f'{self.title}'
 
@@ -93,12 +93,19 @@ class Student(Person):
         ('1','نوجوان'),
         ('2','بزرگسال'),
     ]
+
+    GENDER = [
+        ('0','دخنر'),
+        ('1','پسر'),
+    ]
     balance = models.IntegerField(default=0, null=True, verbose_name='(تومان) مبلغ')
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='students', null=True, blank=True, verbose_name="شعبه")
     grade = models.ForeignKey(Grade,on_delete=models.CASCADE, related_name='students', null=True, blank=True, verbose_name="سطح")
     activity = models.CharField(default=0,max_length=1,choices=ACTIVITY, verbose_name="وضعیت")
-    education = models.CharField(max_length=1, null=True, blank=True, choices=EDUCATION, verbose_name="تحصیلات")
-    ageLevel = models.CharField(max_length=1, null=True, blank=True, choices=AGE_LEVEL, verbose_name="رده سنی")
+    education = models.CharField(max_length=1, null=True, choices=EDUCATION, verbose_name="تحصیلات")
+    ageLevel = models.CharField(max_length=1, null=True, choices=AGE_LEVEL, verbose_name="رده سنی")
+    gender = models.CharField(max_length=1, null=True, choices=GENDER, verbose_name="جنسیت")
+
     # USERNAME_FIELD = 'phone'  # Use phone as the username
 
 

@@ -1,0 +1,29 @@
+{% extends "admin/change_form.html" %}
+{% load admin_urls %}
+{% block submit_buttons_bottom %}
+
+<style>
+    .submit-row a.deletelink { display: none; } /* Hide the original delete link */
+</style>
+
+{% if opts.model_name == "student" and can_add_receipt %}
+    
+<a href="{% url 'admin:a_financial_management_receipt_add' %}?payer={{ original.pk }}" class="button back-button" style="padding: 8px 15px; margin: 30px 8px; height: fit-content;">
+     ثبت یک سند پرداختی برای این دانشجو
+</a>
+{% endif %}
+
+
+
+    <div class="submit-row" style="margin-top: 28px;">
+        <button type="button" onclick="window.history.back();" class="button back-button" style="padding: 8px 5px; margin: auto 8px; background-color: rgb(189, 0, 0); height: fit-content;">
+            بازگشت
+        </button>
+        {{ block.super }}
+        {% if change and has_delete_permission %}
+        <a href="{% url opts|admin_urlname:'delete' original.pk %}" class="deletelink" style="display: block; margin: auto auto auto 0px;">
+                            حذف کامل {{ opts.verbose_name }}
+            </a>
+        {% endif %}
+    </div>
+{% endblock %}

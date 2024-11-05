@@ -9,7 +9,7 @@ from .models import Course, Section, SectionStudent, SectionTimeSlot, Exam, Home
 from django_jalali.forms import jdatetime
 import django_jalali.admin as jadmin # jalali date picker
 from django.db import models  
-
+from django.templatetags.static import static
 from django.contrib import admin
 from .models import Course, Section
 from a_user_management.models import Student
@@ -38,6 +38,19 @@ class AttendanceInline(admin.TabularInline):
     readonly_fields = ('section_student',)
     ordering = ['-date']
 
+
+
+class SectionStudentInline(admin.TabularInline):
+    model = SectionStudent
+    extra = 1
+    verbose_name = "دانشجو"
+    verbose_name_plural = "دانشجو ها"
+    autocomplete_fields = ['student']
+    # Override the queryset to hide existing students in the inline
+    def get_queryset(self, request):
+        return SectionStudent.objects.none()
+
+
 @admin.register(Section)
 class SectionAdmin(admin.ModelAdmin):
 
@@ -52,7 +65,10 @@ class SectionAdmin(admin.ModelAdmin):
 
 
     ]
+
     readonly_fields = ['display_students']  # Add this to display students in the detail view
+
+
     # Method to display the list of students with links in the section edit view
     def display_students(self, obj):
         students = obj.students.all()  # Get all students in the section
@@ -71,6 +87,8 @@ class SectionAdmin(admin.ModelAdmin):
             return "این گروه دانشجویی ندارد"
 
     display_students.short_description = "دانشجو های این گروه"
+
+    
 
     # Optional: You can also keep it in the list_display if you want it on the list view as well
     def list_students(self, obj):
@@ -125,7 +143,12 @@ class SectionAdmin(admin.ModelAdmin):
     )
 
 
-    inlines = [SectionTimeSlotInline]
+    inlines = [SectionStudentInline, SectionTimeSlotInline, ]
+
+
+
+
+
 
 @admin.register(SectionStudent)
 class SectionStudentAdmin(admin.ModelAdmin):
@@ -155,6 +178,14 @@ class SectionStudentAdmin(admin.ModelAdmin):
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
+    class Media:
+        js = ('/static/js/admin/admin_price_format.js',)
+    
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        form_field = super().formfield_for_dbfield(db_field, **kwargs)
+        if db_field.name == 'price':
+            form_field.widget.attrs.update({'class': 'comma-add'})
+        return form_field
     inlines = [SectionInline]
 
 @admin.register(Degree)
@@ -170,8 +201,6 @@ class ExamAdmin(admin.ModelAdmin):
 @admin.register(ExamDocument)
 class ExamDocumentAdmin(admin.ModelAdmin):
     pass
-
-
 
 
 @admin.register(HomeWork)

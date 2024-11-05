@@ -1,6 +1,6 @@
 from django.db import models
 import uuid
-from a_user_management.models import Person
+from a_user_management.models import Student
 from django.utils import timezone
 from datetime import timedelta
 import jdatetime
@@ -69,18 +69,32 @@ class Receipt(models.Model):
     # receipt_id = models.CharField(max_length=63, editable=False, default=generate_custom_id)
     # APh.R-y1403-mo07-d25-h14-mi45-s30-8374
 
-    title = models.CharField(max_length=63, null=True, blank=True, verbose_name='عنوان')
-    description = models.TextField(max_length=511, null=True, blank=True, verbose_name='توضیحات')
+    title = models.CharField(max_length=63, null=True, verbose_name='عنوان')
     transaction_id = models.CharField(max_length=63, unique=True, null=True, blank=True, verbose_name='شماره پیگیری')
+    formatted_amount = models.CharField(max_length=127, null=True, verbose_name='(تومان) مبلغ')
+
     amount = models.DecimalField(max_digits=11, decimal_places=0, null=True, verbose_name='(تومان) مبلغ')
-    payer = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='پرداخت کننده')
-    sender_account = models.CharField(max_length=63, null=True, blank=True, verbose_name='ارسال شده از حساب')
-    receiver_account = models.CharField(max_length=63, null=True, blank=True, verbose_name='دریافت شده در حساب')
+    payer = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, verbose_name='پرداخت کننده')
+    # sender_account = models.CharField(max_length=63, null=True, blank=True, verbose_name='ارسال شده از حساب')
+    # receiver_account = models.CharField(max_length=63, null=True, blank=True, verbose_name='دریافت شده در حساب')
     created_method = models.CharField(max_length=1, choices=[('0', 'اتوماتیک'), ('1', 'دستی')], default='1', verbose_name='روش ثبت')
     payment_method = models.CharField(max_length=1, choices=[('0', 'کارتخوان'), ('1', 'کارت به کارت'), ('2', 'نقدی'), ('3', 'درگاه پرداخت')], default='0', verbose_name='روش پرداخت')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ')
     updated_at = models.DateTimeField(auto_now=True)
     jdate = models.CharField(max_length=15, default=jdatetime.date.today().strftime('%Y/%m/%d'), verbose_name='تاریخ')
+    confirmed = models.BooleanField(default=False, verbose_name='تایید شده')
+    description = models.TextField(max_length=511, default='', null=True, blank=True, verbose_name='توضیحات')
+
+
+    def save(self, *args, **kwargs):
+        if self.formatted_amount:
+            # Remove commas and convert the formatted amount to an integer
+            numeric_value = int(self.formatted_amount.replace(",", ""))
+            self.amount = numeric_value
+        else:
+            self.amount = None  # Handle empty or invalid input as needed
+        super().save(*args, **kwargs)
+
 
     objects = ReceiptQuerySet.as_manager()
     class Meta:
