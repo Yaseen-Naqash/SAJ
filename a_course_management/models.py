@@ -77,7 +77,9 @@ class SectionStudent(models.Model):
 
     ACTIVITY = [
         ('0','در حال تحصیل'),
-        ('1','پایان دوره'),
+        ('1','دوره پایان یافته | قبول'),
+        ('2','دوره پایان یافته | مردود'),
+
     ]
 
     section = models.ForeignKey(Section, on_delete=models.CASCADE, verbose_name='گروه')
@@ -85,10 +87,10 @@ class SectionStudent(models.Model):
     activity = models.CharField(default=0,max_length=1,choices=ACTIVITY, verbose_name="وضعیت دانشجو در این دوره")
 
     date_joined = models.DateField(auto_now_add=True)  # Additional fields
-    class_score = models.DecimalField(default=0, max_digits=5, decimal_places=2, null=True, blank=True, verbose_name='نمره کلاسی')
-    exam_score = models.DecimalField(default=0, max_digits=5, decimal_places=2, null=True, blank=True, verbose_name='نمره پایانی')
+    class_score = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True, verbose_name='نمره کلاسی')
+    exam_score = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True, verbose_name='نمره پایانی')
 
-    # dept قرض
+    # dept قرض 
     # payments پرداختی
 
 
@@ -172,13 +174,13 @@ class HomeWork(models.Model):
 
 
 class HomeWorkDocument(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='homeWorks', null=True, blank=True)
-    homeWork = models.ForeignKey(HomeWork,on_delete=models.CASCADE, related_name='documents', null=True, blank=True)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='homeWorks', null=True, blank=True, verbose_name='دانش آموزش')
+    homeWork = models.ForeignKey(HomeWork,on_delete=models.CASCADE, related_name='documents', null=True, blank=True, verbose_name='تمرین')
     pdf = models.FileField(upload_to='HomeWorks/files/')  # 'documents/pdfs/' is the upload path
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    seen = models.BooleanField(default=False)
-    score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    seen = models.BooleanField(default=False, verbose_name='وضعیت')
+    score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name='نمره')
 
     
     class Meta:

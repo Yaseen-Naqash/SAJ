@@ -13,6 +13,7 @@ from django.templatetags.static import static
 from django.contrib import admin
 from .models import Course, Section
 from a_user_management.models import Student
+from decimal import Decimal
 
 # Register your models here.
 admin.site.register(SectionTimeSlot)
@@ -176,6 +177,68 @@ class SectionStudentAdmin(admin.ModelAdmin):
         'section',
     )
 
+    # Define the action method
+    def end_section(self, request, queryset):
+
+                # Check for students with missing scores
+        missing_scores = queryset.filter(class_score__isnull=True) | queryset.filter(exam_score__isnull=True)
+        
+        missing_count = missing_scores.count()
+
+        # If there are students with missing scores, show an error message
+        if missing_count > 0:
+            self.message_user(
+                request,
+                f"{missing_count} دانشجو نمره ثبت نشده دارند",
+                messages.ERROR
+            )
+        else:
+            # Process each SectionStudent to create Degree objects and update activity
+            created_degrees = 0
+            for section_student in queryset:
+                # Calculate the score
+
+                score = (Decimal('0.7') * section_student.class_score) + (Decimal('0.3') * section_student.exam_score)
+                if score >= 70:
+
+                    # Create the Degree object
+                    Degree.objects.create(
+                        course=section_student.section.course,
+                        student=section_student.student,
+                        score=score,
+                        course_hours=section_student.section.course.course_hours
+                    )
+                    created_degrees += 1
+                    section_student.student.activity = 1
+                    section_student.student.save()
+                else:
+                    section_student.student.activity = 2
+                    section_student.student.save()
+
+
+                
+                # Update student's activity
+                
+                
+
+
+
+            updated_count = queryset.update(activity=1)  # Example action: set activity to True
+
+
+
+            self.message_user(
+                request,
+                f"دوره برای {updated_count} دانشجو به اتمام رسید و مدارک آنها در بخش مدارک قابل رویت است.",
+                messages.SUCCESS
+            )
+
+    # Register the action with a display name
+    end_section.short_description = "اتمام دوره و صدور مدرک"
+
+    # Add the action to the actions list
+    actions = [end_section]
+
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
     class Media:
@@ -211,12 +274,42 @@ class HomeWorkAdmin(admin.ModelAdmin):
 
 @admin.register(HomeWorkDocument)
 class HomeWorkDocumentAdmin(admin.ModelAdmin):
-    pass
+    
+    
+    list_display= [
+        'student',
+        'homeWork',
+        'get_section',
+
+        'seen',
+        'score',
+    ]
+
+    # Define a custom method to display the section with verbose name 'گروه'
+    def get_section(self, obj):
+        return obj.homeWork.section
+    get_section.short_description = 'گروه'  # This sets the column label in the admin
+
+    search_fields = [
+        'student__first_name', 
+        'student__last_name',
+    ]
+
+    list_filter = (
+        'homeWork',
+        'seen',
+        'homeWork__section',
+    )
 
 
 @admin.register(Attendance)
 class AttendanceAdmin(admin.ModelAdmin):
-    list_display = ('section_student__student','section' , 'date', 'status', 'session')
+    list_display = ('get_students' ,'section' , 'date', 'status', 'session')
+
+    def get_students(self, obj):
+        return obj.section_student.student
+    get_students.short_description = 'دانش آموز'  # This sets the column label in the admin
+
 
     #   THIS PART HANDLED VIA get_list_filter METHOD BELOW
     #   list_filter = ('section_student__section', 'grg_date', 'session', 'section')

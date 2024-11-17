@@ -29,7 +29,7 @@ class PhoneVerification(models.Model):
     
     class Meta:
         verbose_name = "تاییدیه شماره"  # Singular name for admin
-        verbose_name_plural = " تاییدیه شماره ها"  # Plural name for admin
+        verbose_name_plural = "تاییدیه شماره ها"  # Plural name for admin
 
     def generate_code(self):
         self.verification_code = str(random.randint(1000, 9999))
@@ -73,7 +73,7 @@ class Grade(models.Model):
 class Student(Person):
     ACTIVITY = [
         ('0','در حال تحصیل'),
-        ('1','پایان دوره'),
+        ('1','در انتظار ثبت نام'),
         ('2','معلق'),
 
     ]

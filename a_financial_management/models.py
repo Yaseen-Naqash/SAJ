@@ -63,6 +63,15 @@ class ReceiptQuerySet(models.QuerySet):
 
 class Receipt(models.Model):
 
+    PAYMENT_METHOD = [
+        ('0', 'کارتخوان'),
+        ('1', 'کارت به کارت'),
+        ('2', 'نقدی'), 
+        ('3', 'درگاه پرداخت'), 
+        ('4', 'تخفیفی'),
+    ]
+
+
     receipt_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     # 3e5f3f76-ea8d-49b9-a34f-84392b74bc0b
 
@@ -78,7 +87,7 @@ class Receipt(models.Model):
     # sender_account = models.CharField(max_length=63, null=True, blank=True, verbose_name='ارسال شده از حساب')
     # receiver_account = models.CharField(max_length=63, null=True, blank=True, verbose_name='دریافت شده در حساب')
     created_method = models.CharField(max_length=1, choices=[('0', 'اتوماتیک'), ('1', 'دستی')], default='1', verbose_name='روش ثبت')
-    payment_method = models.CharField(max_length=1, choices=[('0', 'کارتخوان'), ('1', 'کارت به کارت'), ('2', 'نقدی'), ('3', 'درگاه پرداخت')], default='0', verbose_name='روش پرداخت')
+    payment_method = models.CharField(max_length=1, choices=PAYMENT_METHOD, default='0', verbose_name='روش پرداخت')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ')
     updated_at = models.DateTimeField(auto_now=True)
     jdate = models.CharField(max_length=15, default=jdatetime.date.today().strftime('%Y/%m/%d'), verbose_name='تاریخ')
