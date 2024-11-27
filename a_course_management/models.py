@@ -1,5 +1,5 @@
 from django.db import models
-import jdatetime
+import jdatetime # type: ignore
 from a_user_management.models import Teacher, Student
 
 from django.core.exceptions import ValidationError

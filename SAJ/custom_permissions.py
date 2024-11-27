@@ -6,8 +6,6 @@ class AdminPermissionMixin(admin.ModelAdmin):
         'مالک': {
             'student': [
                 'is_superuser',
-                'is_staff',
-                'is_active',
                 'groups',
                 'user_permissions',
                 'branch',
@@ -17,59 +15,119 @@ class AdminPermissionMixin(admin.ModelAdmin):
   
             'teacher': [
                 'is_superuser',
-                'is_staff',
-                'is_active',
                 'groups',
                 'user_permissions',
                 'password',
                 'username',
                 'branch',
                 'date_joined',
-                'code_melli',
             ],
             'manager': [
                 'is_superuser',
-                'is_staff',
-                'is_active',
                 'groups',
                 'user_permissions',
                 'password',
                 'username',
                 'branch',
                 'date_joined',
-                'code_melli',
             ],
             'employee': [
                 'is_superuser',
-                'is_staff',
-                'is_active',
                 'groups',
                 'user_permissions',
                 'password',
                 'username',
                 'branch',
                 'date_joined',
-                'code_melli',
             ],
         },
 
 
         'مدیر': {
-            'student': {
-                'password',
+            'student': [
                 'is_superuser',
+                'groups',
+                'user_permissions',
+                'branch',
+                'grade',
+
+            ],
+  
+            'teacher': [
+                'is_superuser',
+                'groups',
+                'user_permissions',
+                'password',
                 'username',
-                'is_staff',
-                'is_active',
+                'branch',
                 'date_joined',
-                'code_melli',
-            },
+            ],
+            'manager': [
+                'is_superuser',
+                'groups',
+                'user_permissions',
+                'password',
+                'username',
+                'branch',
+                'date_joined',
+            ],
+            'employee': [
+                'is_superuser',
+                'groups',
+                'user_permissions',
+                'password',
+                'username',
+                'branch',
+                'date_joined',
+            ],
         },
         
 
         'کارمند': {
-            'student': ['phone'],
-            'teacher': ['phone'],
+            'student': [
+                'is_superuser',
+                'groups',
+                'user_permissions',
+                'branch',
+                'grade',
+                'is_staff',
+                'is_active',
+
+            ],
+  
+            'teacher': [
+                'is_staff',
+                'is_active',
+                'is_superuser',
+                'groups',
+                'user_permissions',
+                'password',
+                'username',
+                'branch',
+                'date_joined',
+            ],
+            'manager': [
+                'is_staff',
+                'is_active',
+                'is_superuser',
+                'groups',
+                'user_permissions',
+                'password',
+                'username',
+                'branch',
+                'date_joined',
+            ],
+            'employee': [
+                'is_staff',
+                'is_active',
+                'is_superuser',
+                'groups',
+                'user_permissions',
+                'password',
+                'username',
+                'branch',
+                'date_joined',
+            ],
         },
 
         'استاد': {
@@ -84,25 +142,20 @@ class AdminPermissionMixin(admin.ModelAdmin):
                 'phone2',
                 'phone',
                 'email',
-                'last_login',
                 'groups',
                 'user_permissions',
-                ],
-            'teacher': ['phone'],
+            ],
         },
 
         
     }
 
     readonly_fields_group_map = {
-        'group1': {
+        'استاد': {
             'student': ['phone'],
             'teacher': ['phone'],
         },
-        'group2': {
-            'student': ['phone'],
-            'teacher': ['phone'],
-        }
+
     }
 
     def get_model_name(self):
