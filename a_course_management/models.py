@@ -2,7 +2,7 @@ from django.db import models
 import jdatetime
 from a_user_management.models import Teacher, Student
 
-
+from django.core.exceptions import ValidationError
 # Create your models here.
 
 
@@ -22,14 +22,14 @@ class Course(models.Model):
     course_img = models.ImageField(upload_to='Course_images/', null=True, verbose_name='تصویر دوره')
     price = models.CharField(max_length=127, null=True, verbose_name='قیمت ثبت نام به تومان')
     installment = models.CharField(default=0,max_length=1,choices=INSTALLMENT, null=True, blank=True, verbose_name='اقساط')
-    courseDuration = models.CharField(max_length=127, null=True , blank=True, verbose_name='مقدار جلسات دوره')
-
+    courseDuration = models.CharField(max_length=63, null=True , blank=True, verbose_name='تعداد جلسات دوره')
+    session_length = models.CharField(max_length=63, null=True , blank=True, verbose_name='مدت زمان هر جلسه')
     course_hours = models.IntegerField(default=10, null=True, verbose_name='تعداد ساعت دوره')
     description = models.TextField(max_length=2047, null=True , blank=True, verbose_name='توضیحات')
-
+    
     class Meta:
         verbose_name = "دوره"  # Singular name for admin
-        verbose_name_plural = "دوره ها"  # Plural name for admin
+        verbose_name_plural = "2- دوره ها"  # Plural name for admin
 
     def __str__(self):
         return self.title
@@ -47,23 +47,24 @@ class Section(models.Model):
         ('0','دخنر'),
         ('1','پسر'),
         ('2','مختلط'),
-
     ]
 
     name = models.CharField(max_length=63, null=True, blank=True, verbose_name='گروه') #or section number
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='sections', null=True, blank=True, verbose_name='دوره')
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='sections', null=True, blank=True, verbose_name='استاد')
     students = models.ManyToManyField(Student, through='SectionStudent', related_name='sections', verbose_name='دانشجو ها')
-
+    online_section = models.BooleanField(default=False, verbose_name='برگزاری آنلاین')
     capacity = models.IntegerField(null=True, blank=True, default=1, verbose_name='ظرفیت')
     registered = models.IntegerField(null=True, blank=True, default=0, verbose_name='ثبت نام شده')
     section_status = models.CharField(default=1,max_length=1,choices=TYPE, verbose_name='وضعیت')
     session_number = models.IntegerField(null=True, blank=True, default=0, verbose_name=' تعداد جلسات برگزار شده ')
     gender = models.CharField(max_length=1, null=True, blank=True, choices=GENDER, verbose_name="جنسیت")
+    start_date = models.DateField(verbose_name='تاریخ شروع', null=True)
+    end_date = models.DateField(verbose_name='تاریخ پایان', null=True)
 
     class Meta:
-        verbose_name = "سکشن" 
-        verbose_name_plural = "سکشن ها" 
+        verbose_name = "گروه"
+        verbose_name_plural = "3- گروه ها" 
 
     def __str__(self):
         return f'{self.course.title} - {self.teacher} | {self.name}'
@@ -87,8 +88,8 @@ class SectionStudent(models.Model):
     activity = models.CharField(default=0,max_length=1,choices=ACTIVITY, verbose_name="وضعیت دانشجو در این دوره")
 
     date_joined = models.DateField(auto_now_add=True)  # Additional fields
-    class_score = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True, verbose_name='نمره کلاسی')
-    exam_score = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True, verbose_name='نمره پایانی')
+    class_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name='نمره کلاسی')
+    exam_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name='نمره پایانی')
 
     # dept قرض 
     # payments پرداختی
@@ -96,8 +97,19 @@ class SectionStudent(models.Model):
 
     class Meta:
         verbose_name = "دوره برای دانشجو" 
-        verbose_name_plural = "دوره های دانشجو ها" 
+        verbose_name_plural = "1- دانشجو های دوره" 
+        unique_together = ('section', 'student')  # Enforce uniqueness of student in section
 
+    # def clean(self):
+    #     # Additional validation logic
+    #     if SectionStudent.objects.filter(section=self.section, student=self.student).exists():
+    #         raise ValidationError('این دانشجو قبلا در این گروه اضافه شده است.')
+        
+
+    # def save(self, *args, **kwargs):
+    #     self.clean()  # Ensure validation before saving
+    #     super().save(*args, **kwargs)
+        
     def __str__(self):
         return f'{self.student} در {self.section}'
     
@@ -137,7 +149,7 @@ class Attendance(models.Model):
 
     class Meta:
         verbose_name = "حضور غیاب ها" 
-        verbose_name_plural = "حضور غیاب" 
+        verbose_name_plural = "4- حضور غیاب" 
 
 
 class Exam(models.Model):
@@ -148,7 +160,7 @@ class Exam(models.Model):
 
     class Meta:
         verbose_name = "آزمون" 
-        verbose_name_plural = " آزمون ها" 
+        verbose_name_plural = "8- آزمون ها" 
     
     def __str__(self):
         return f'آزمون برای {self.section.course.title} | {self.teacher} | {self.section.name}'
@@ -166,7 +178,7 @@ class HomeWork(models.Model):
     
     class Meta:
         verbose_name = "تمرین" 
-        verbose_name_plural = "تمرین ها" 
+        verbose_name_plural = "6- تمرین ها" 
 
 
     def __str__(self):
@@ -185,12 +197,11 @@ class HomeWorkDocument(models.Model):
     
     class Meta:
         verbose_name = "پاسخ تمرین" 
-        verbose_name_plural = "پاسخ تمرین ها" 
+        verbose_name_plural = "7- پاسخ تمرین ها" 
 
     def __str__(self):
         return f' تمرین تحویلی از {self.student} برای {self.homeWork.section.teacher}'
     
-
 class ExamDocument(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='exams', null=True, blank=True)
     exam = models.ForeignKey(Exam,on_delete=models.CASCADE, related_name='exams', null=True, blank=True)
@@ -201,7 +212,7 @@ class ExamDocument(models.Model):
 
     class Meta:
         verbose_name = "پاسخ آزمون" 
-        verbose_name_plural = "پاسخ آزمون ها" 
+        verbose_name_plural = "9- پاسخ آزمون ها" 
 
     
     def __str__(self):
@@ -220,8 +231,10 @@ class Degree(models.Model):
     j_create_date = models.CharField(max_length=15, default=jdatetime.date.today().strftime('%Y/%m/%d'), verbose_name='تاریخ صدور')
 
     class Meta:
-        verbose_name = "مدرک" 
-        verbose_name_plural = "مدارک" 
+        verbose_name = "مدرک"
+        verbose_name_plural = "5- مدارک"
+        unique_together = ('course', 'student')
+
 
     def __str__(self):
         return f' مدرک : {self.course.title} برای {self.student}'

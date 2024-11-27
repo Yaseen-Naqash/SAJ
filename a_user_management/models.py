@@ -3,6 +3,9 @@ from django.db import models
 from a_institution_management.models import Branch
 import random
 from django.utils import timezone
+from django.contrib.auth.models import Group
+
+
 
 class Person(AbstractUser):
     code_melli = models.CharField(max_length=10, null=True, verbose_name="کد ملی")
@@ -35,29 +38,70 @@ class PhoneVerification(models.Model):
         self.verification_code = str(random.randint(1000, 9999))
 
 
+
+class Owner(Person):
+    class Meta:
+        verbose_name = "مالک" 
+        verbose_name_plural = "5- مالکان"  
+
+    def save(self, *args, **kwargs):
+         # Check if the password needs hashing
+        if not self.password.startswith('pbkdf2_'):  # Adjust based on your hashing algorithm
+            self.set_password(self.password)  # Hash the password
+        super().save(*args, **kwargs)  # Save the instance first
+
+    def __str__(self):
+        return f"مالک {self.first_name} {self.last_name}"
+    
+
+class Manager(Person):
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='manager', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+         # Check if the password needs hashing
+        if not self.password.startswith('pbkdf2_'):  # Adjust based on your hashing algorithm
+            self.set_password(self.password)  # Hash the password
+        super().save(*args, **kwargs)  # Save the instance first
+
+
+    class Meta:
+        verbose_name = "مدیر" 
+        verbose_name_plural = "4- مدیران"  
+    def __str__(self):
+        return f"مدیر {self.first_name} {self.last_name}"
+
 class Employee(Person):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='employees', null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+         # Check if the password needs hashing
+        if not self.password.startswith('pbkdf2_'):  # Adjust based on your hashing algorithm
+            self.set_password(self.password)  # Hash the password
+        super().save(*args, **kwargs)  # Save the instance first
+
+
     class Meta:
         verbose_name = "کارمند" 
-        verbose_name_plural = "کارمندان"  
+        verbose_name_plural = "3- کارمندان"  
     def __str__(self):
         return f"کارمند {self.first_name} {self.last_name}"
     
-
 class Teacher(Person):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='teachers', null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+         # Check if the password needs hashing
+        if not self.password.startswith('pbkdf2_'):  # Adjust based on your hashing algorithm
+            self.set_password(self.password)  # Hash the password
+        super().save(*args, **kwargs)  # Save the instance first
 
 
     class Meta:
         verbose_name = "استاد"  
-        verbose_name_plural = "اساتید"  
+        verbose_name_plural = "2- استاتید"  
     def __str__(self):
         return f"استاد {self.first_name} {self.last_name}"
     
-
-
 
 class Grade(models.Model):
     title = models.CharField(max_length=127, null=True)
@@ -71,6 +115,10 @@ class Grade(models.Model):
         return f'{self.title}'
 
 class Student(Person):
+
+
+
+    
     ACTIVITY = [
         ('0','در حال تحصیل'),
         ('1','در انتظار ثبت نام'),
@@ -95,7 +143,7 @@ class Student(Person):
     ]
 
     GENDER = [
-        ('0','دخنر'),
+        ('0','دختر'),
         ('1','پسر'),
     ]
     balance = models.IntegerField(default=0, null=True, verbose_name='(تومان) مبلغ')
@@ -108,9 +156,19 @@ class Student(Person):
 
     # USERNAME_FIELD = 'phone'  # Use phone as the username
 
+    @property
+    def latest_course_title(self):
+        latest_section_student = self.section_student.filter(activity='1').order_by('-id').first()
+        if latest_section_student:
+            return latest_section_student.section.course.title
+        return "بدون دوره"
 
     class Meta:
         verbose_name = "دانشجو"  # Singular name for admin
-        verbose_name_plural = "دانشجو ها"  # Plural name for admin
+        verbose_name_plural = "1- دانشجوها"  # Plural name for admin
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+    
+
+
+    

@@ -3,6 +3,75 @@ from django.contrib.auth.models import Group
 
 class AdminPermissionMixin(admin.ModelAdmin):
     hidden_fields_group_map = {
+        'مالک': {
+            'student': [
+                'is_superuser',
+                'is_staff',
+                'is_active',
+                'groups',
+                'user_permissions',
+                'branch',
+                'grade',
+
+            ],
+  
+            'teacher': [
+                'is_superuser',
+                'is_staff',
+                'is_active',
+                'groups',
+                'user_permissions',
+                'password',
+                'username',
+                'branch',
+                'date_joined',
+                'code_melli',
+            ],
+            'manager': [
+                'is_superuser',
+                'is_staff',
+                'is_active',
+                'groups',
+                'user_permissions',
+                'password',
+                'username',
+                'branch',
+                'date_joined',
+                'code_melli',
+            ],
+            'employee': [
+                'is_superuser',
+                'is_staff',
+                'is_active',
+                'groups',
+                'user_permissions',
+                'password',
+                'username',
+                'branch',
+                'date_joined',
+                'code_melli',
+            ],
+        },
+
+
+        'مدیر': {
+            'student': {
+                'password',
+                'is_superuser',
+                'username',
+                'is_staff',
+                'is_active',
+                'date_joined',
+                'code_melli',
+            },
+        },
+        
+
+        'کارمند': {
+            'student': ['phone'],
+            'teacher': ['phone'],
+        },
+
         'استاد': {
             'student': [
                 'password',
@@ -21,10 +90,8 @@ class AdminPermissionMixin(admin.ModelAdmin):
                 ],
             'teacher': ['phone'],
         },
-        'کارمند': {
-            'student': ['phone'],
-            'teacher': ['phone'],
-        }
+
+        
     }
 
     readonly_fields_group_map = {
@@ -84,10 +151,18 @@ class AdminPermissionMixin(admin.ModelAdmin):
         Filter the queryset based on the user's group and the current model.
         """
         qs = super().get_queryset(request)
-        if request.user.groups.filter(name='group1').exists():
+        if request.user.groups.filter(name='مالک').exists():
             # Apply custom queryset logic for group1
             return qs.filter(active=True)
-        elif request.user.groups.filter(name='group2').exists():
+        elif request.user.groups.filter(name='مدیر').exists():
             # Apply custom queryset logic for group2
             return qs.filter(active=False)
+
+        elif request.user.groups.filter(name='کارمند').exists():
+            # Apply custom queryset logic for group2
+            return qs.filter(active=False)
+        elif request.user.groups.filter(name='استاد').exists():
+            # Apply custom queryset logic for group2
+            return qs.filter(active=False)
+
         return qs

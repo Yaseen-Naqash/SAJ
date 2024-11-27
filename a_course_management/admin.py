@@ -14,38 +14,78 @@ from django.contrib import admin
 from .models import Course, Section
 from a_user_management.models import Student
 from decimal import Decimal
+from django.urls import path
+from django.shortcuts import redirect
+
+
+
+
+def process_section_students(request, queryset):
+    # Check for students with missing scores
+    missing_scores = queryset.filter(class_score__isnull=True) | queryset.filter(exam_score__isnull=True)
+    missing_count = missing_scores.count()
+
+    if missing_count > 0:
+        # If there are students with missing scores, show an error message
+        return f"{missing_count} دانشجو نمره ثبت نشده دارند", False
+
+    # Process each SectionStudent to create Degree objects and update activity
+    created_degrees = 0
+    for section_student in queryset:
+        # Calculate the score
+        score = (Decimal('0.7') * section_student.class_score) + (Decimal('0.3') * section_student.exam_score)
+        if score >= 70:
+            # Create the Degree object
+            Degree.objects.create(
+                course=section_student.section.course,
+                student=section_student.student,
+                score=score,
+                course_hours=section_student.section.course.course_hours,
+            )
+            created_degrees += 1
+            section_student.activity = '1'
+        else:
+            section_student.activity = '2'
+        section_student.save()
+
+    updated_count = queryset.count()
+    return (
+        f"دوره برای {updated_count} دانشجو به اتمام رسید. {created_degrees} دانشجو قبول و {updated_count - created_degrees} دانشجو مردود شدند. مدارک قبول شدگان در بخش مدارک قابل مشاهده است.",
+        True,
+    )
+
 
 # Register your models here.
-admin.site.register(SectionTimeSlot)
+# admin.site.register(SectionTimeSlot)
 
 
 class StudentInline(admin.TabularInline):
     model = Student
-    extra = 1 
+    extra = 0
 
 class SectionInline(admin.TabularInline):  
     model = Section
-    extra = 1  
+    extra = 0
 
 class SectionTimeSlotInline(admin.TabularInline):  
     model = SectionTimeSlot
-    extra = 1  
+    extra = 0
 
 class AttendanceInline(admin.TabularInline):
     model = Attendance
-    extra = 1
+    extra = 0
     can_delete = False
     fields = ('section_student', 'date', 'status')
     readonly_fields = ('section_student',)
     ordering = ['-date']
-
-
 
 class SectionStudentInline(admin.TabularInline):
     model = SectionStudent
     extra = 1
     verbose_name = "دانشجو"
     verbose_name_plural = "دانشجو ها"
+    fields = ('student',)
+
     autocomplete_fields = ['student']
     # Override the queryset to hide existing students in the inline
     def get_queryset(self, request):
@@ -63,9 +103,42 @@ class SectionAdmin(admin.ModelAdmin):
         'section_status',
         'capacity',
         'registered',
-
-
+        'end_section_button',
     ]
+
+    
+    def end_section_button(self, obj):
+        url = reverse('admin:end_section', args=[obj.id])
+        return format_html(
+            '<a class="button" href="{}" onclick="return confirm(\'آیا برای اتمام این دوره و صدور مدرک مطمن هستید؟\')">اتمام دوره</a>',
+            url,
+        )
+    end_section_button.short_description = "اتمام دوره"
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                'end_section/<int:section_id>/',
+                self.admin_site.admin_view(self.end_section_view),
+                name='end_section',
+            ),
+        ]
+        return custom_urls + urls
+
+    def end_section_view(self, request, section_id):
+        section = Section.objects.get(pk=section_id)
+        section_students = SectionStudent.objects.filter(section=section)
+
+        # Process the SectionStudent records
+        message, success = process_section_students(request, section_students)
+
+        if success:
+            self.message_user(request, message, messages.SUCCESS)
+        else:
+            self.message_user(request, message, messages.ERROR)
+
+        return redirect(f"{reverse('admin:a_course_management_section_changelist')}")
 
     readonly_fields = ['display_students']  # Add this to display students in the detail view
 
@@ -130,25 +203,25 @@ class SectionAdmin(admin.ModelAdmin):
     # Add a custom action in the admin panel
     actions = ['mark_attendance_today']
 
+    
 
 
     search_fields = [
         'teacher__first_name', 
         'teacher__last_name',
         'course__title',
+        'name',
     ]
     list_filter = (
         'section_status',
         'course',
-        'name',
     )
 
 
     inlines = [SectionStudentInline, SectionTimeSlotInline, ]
-
-
-
-
+    formfield_overrides = {
+        models.DateField: {'widget': jadmin.widgets.AdminjDateWidget},  # Use Jalali date picker in admin
+    }
 
 
 @admin.register(SectionStudent)
@@ -209,27 +282,18 @@ class SectionStudentAdmin(admin.ModelAdmin):
                         course_hours=section_student.section.course.course_hours
                     )
                     created_degrees += 1
-                    section_student.student.activity = 1
-                    section_student.student.save()
+                    section_student.activity = '1'
+                    section_student.save()
                 else:
-                    section_student.student.activity = 2
-                    section_student.student.save()
-
-
+                    section_student.activity = '2'
+                    section_student.save()
                 
-                # Update student's activity
-                
-                
-
-
-
-            updated_count = queryset.update(activity=1)  # Example action: set activity to True
-
-
+            
+            updated_count = queryset.count()
 
             self.message_user(
                 request,
-                f"دوره برای {updated_count} دانشجو به اتمام رسید و مدارک آنها در بخش مدارک قابل رویت است.",
+                f"دوره برای {updated_count} دانشجو به اتمام رسید. {created_degrees} دانشجو قبول و {updated_count-created_degrees} دانشجو مردود شدند. مدارک قبول شدگان در بخش مدارک قابل مشاهده است.",
                 messages.SUCCESS
             )
 
@@ -241,6 +305,23 @@ class SectionStudentAdmin(admin.ModelAdmin):
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
+
+    list_display= [
+        'title',
+        'price',
+        'installment',
+        'courseDuration',
+        'session_length',
+    ]
+    search_fields = [
+        'title', 
+
+    ]
+    list_filter = (
+        'installment',
+
+    )
+
     class Media:
         js = ('/static/js/admin/admin_price_format.js',)
     

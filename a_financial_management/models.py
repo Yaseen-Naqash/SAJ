@@ -109,6 +109,7 @@ class Receipt(models.Model):
     class Meta:
         verbose_name = "رسید مالی"  # Singular name for admin
         verbose_name_plural = "رسید های مالی"  # Plural name for admin
+        ordering = ['confirmed', '-created_at']
     def __str__(self):
         return f"مبلغ {self.amount} تومان از {self.payer}"
 

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Teacher, Person, PhoneVerification, Grade, Employee
+from .models import Student, Teacher, Person, PhoneVerification, Grade, Employee, Manager, Owner
 from a_course_management.models import Section, HomeWork, HomeWorkDocument, Exam, ExamDocument
 from a_financial_management.models import Receipt
 import django_jalali.admin as jadmin # jalali date picker
@@ -9,9 +9,11 @@ from SAJ.custom_permissions import AdminPermissionMixin
 from django.urls import reverse
 from django.utils.html import format_html
 
+
 class SectionStudentInline(admin.TabularInline):
     model = Section.students.through  
     extra = 0
+    autocomplete_fields = ['section']
 
 class ReceiptInline(admin.TabularInline):
     model = Receipt
@@ -20,11 +22,12 @@ class ReceiptInline(admin.TabularInline):
 
 
 # TEACHER
-class TeacherAdmin(admin.ModelAdmin):
+@admin.register(Teacher)
+class TeacherAdmin(AdminPermissionMixin, admin.ModelAdmin):
     list_display = (
         'first_name', 
         'last_name', 
-        'phone', 
+        'phone',
         'code_melli',
     )
     
@@ -33,12 +36,25 @@ class TeacherAdmin(admin.ModelAdmin):
     formfield_overrides = {
         models.DateField: {'widget': jadmin.widgets.AdminjDateWidget},  # Use Jalali date picker in admin
     }
-admin.site.register(Teacher)
 
 
-admin.site.register(PhoneVerification)
-admin.site.register(Grade)
-admin.site.register(Employee)
+# admin.site.register(PhoneVerification)
+# admin.site.register(Grade)
+
+@admin.register(Employee)
+class EmployeeAdmin(AdminPermissionMixin, admin.ModelAdmin):
+    list_display = (
+        'first_name', 
+        'last_name', 
+        'phone',
+        'code_melli',
+    )
+    
+    search_fields = ['first_name', 'last_name', 'phone', 'code_melli']  # Define searchable fields for Student
+
+    formfield_overrides = {
+        models.DateField: {'widget': jadmin.widgets.AdminjDateWidget},  # Use Jalali date picker in admin
+    }
 
 
 
@@ -74,12 +90,29 @@ class StudentAdmin(AdminPermissionMixin, admin.ModelAdmin):
         'first_name', 
         'last_name', 
         'phone', 
-        'code_melli', 
-        'grade',
-        'balance_status',
+        'latest_course_title',
+        'formatted_balance',
         'view_receipts_link',
     )
+    readonly_fields = ('latest_course_title',)
 
+    
+    def latest_course_title(self, obj):
+        return obj.latest_course_title
+    latest_course_title.short_description = "آخرین دوره قبول شده"
+    
+    def formatted_balance(self, obj):
+        # Format the balance with commas and color based on its value
+        balance = obj.balance
+        formatted = f"{abs(balance):,}"  # Add commas to the balance value remove = sign from value
+        if balance > 0:
+            return format_html('<span style="color: #2cff05;">{}</span>', formatted)
+        elif balance < 0:
+            return format_html('<span style="color: #ff2c2c;">{}</span>', formatted)
+        else:
+            return '0'  # No special color for zero balance
+
+    formatted_balance.short_description = 'موجودی (تومان)'
     
     def view_receipts_link(self, obj):
         url = reverse('admin:a_financial_management_receipt_changelist') + f'?payer__id__exact={obj.id}'
@@ -130,5 +163,24 @@ class StudentAdmin(AdminPermissionMixin, admin.ModelAdmin):
 
 
 
+#MANAGER
+@admin.register(Manager)
+class ManagerAdmin(AdminPermissionMixin, admin.ModelAdmin):
 
 
+    list_display = (
+        'first_name', 
+        'last_name', 
+        'phone', 
+    )
+
+#OWNER
+@admin.register(Owner)
+class OwnerAdmin(AdminPermissionMixin, admin.ModelAdmin):
+
+
+    list_display = (
+        'first_name', 
+        'last_name', 
+        'phone', 
+    )
