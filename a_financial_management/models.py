@@ -102,7 +102,14 @@ class Receipt(models.Model):
             self.amount = numeric_value
         else:
             self.amount = None  # Handle empty or invalid input as needed
+
+
+
         super().save(*args, **kwargs)
+
+        if self.payment_method == '4' and self.payer:
+            self.payer.balance += self.amount
+            self.payer.save()  # Save the updated payer's balance
 
 
     objects = ReceiptQuerySet.as_manager()

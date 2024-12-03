@@ -126,6 +126,7 @@ class StudentAdmin(AdminPermissionMixin, admin.ModelAdmin):
         'ageLevel',
         'activity',
         'branch',
+        'gender',
         BalanceStatusFilter,
         
     )

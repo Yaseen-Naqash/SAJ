@@ -1,6 +1,7 @@
 from django.db import models
 import jdatetime # type: ignore
 from a_user_management.models import Teacher, Student
+from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 # Create your models here.
@@ -50,17 +51,19 @@ class Section(models.Model):
     ]
 
     name = models.CharField(max_length=63, null=True, blank=True, verbose_name='گروه') #or section number
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='sections', null=True, blank=True, verbose_name='دوره')
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='sections', null=True, blank=True, verbose_name='استاد')
+    course = models.ForeignKey(Course, on_delete=models.SET_NULL, related_name='sections', null=True, blank=True, verbose_name='دوره')
+    teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, related_name='sections', null=True, blank=True, verbose_name='استاد')
     students = models.ManyToManyField(Student, through='SectionStudent', related_name='sections', verbose_name='دانشجو ها')
     online_section = models.BooleanField(default=False, verbose_name='برگزاری آنلاین')
     capacity = models.IntegerField(null=True, blank=True, default=1, verbose_name='ظرفیت')
-    registered = models.IntegerField(null=True, blank=True, default=0, verbose_name='ثبت نام شده')
     section_status = models.CharField(default=1,max_length=1,choices=TYPE, verbose_name='وضعیت')
     session_number = models.IntegerField(null=True, blank=True, default=0, verbose_name=' تعداد جلسات برگزار شده ')
     gender = models.CharField(max_length=1, null=True, blank=True, choices=GENDER, verbose_name="جنسیت")
-    start_date = models.DateField(verbose_name='تاریخ شروع', null=True)
-    end_date = models.DateField(verbose_name='تاریخ پایان', null=True)
+
+
+    @property
+    def registered(self):
+        return self.students.count()
 
     class Meta:
         verbose_name = "گروه"
@@ -83,32 +86,50 @@ class SectionStudent(models.Model):
 
     ]
 
-    section = models.ForeignKey(Section, on_delete=models.CASCADE, verbose_name='گروه')
-    student = models.ForeignKey(Student, related_name='section_student', on_delete=models.CASCADE, verbose_name='دانشجو')
+    section = models.ForeignKey(Section, on_delete=models.SET_NULL, verbose_name='گروه', null=True)
+    student = models.ForeignKey(Student, related_name='section_student', on_delete=models.SET_NULL, verbose_name='دانشجو', null=True)
     activity = models.CharField(default=0,max_length=1,choices=ACTIVITY, verbose_name="وضعیت دانشجو در این دوره")
 
     date_joined = models.DateField(auto_now_add=True)  # Additional fields
     class_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name='نمره کلاسی')
     exam_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name='نمره پایانی')
+    start_date = models.DateField(verbose_name='تاریخ شروع', null=True, blank=True)
+    end_date = models.DateField(verbose_name='تاریخ پایان', null=True, blank=True)
+    # you ask question about when this date should register
 
-    # dept قرض 
-    # payments پرداختی
 
+    @property
+    def score(self):
+        if self.class_score and self.exam_score:
+            score = (Decimal('0.7') * self.class_score) + (Decimal('0.3') * self.exam_score)
+            return (f'{score}')
+        return "بدون نمره"
 
     class Meta:
         verbose_name = "دوره برای دانشجو" 
-        verbose_name_plural = "1- دانشجو های دوره" 
-        unique_together = ('section', 'student')  # Enforce uniqueness of student in section
+        verbose_name_plural = "1- اطلاعات تحصیلی" 
 
-    # def clean(self):
-    #     # Additional validation logic
-    #     if SectionStudent.objects.filter(section=self.section, student=self.student).exists():
-    #         raise ValidationError('این دانشجو قبلا در این گروه اضافه شده است.')
-        
 
-    # def save(self, *args, **kwargs):
-    #     self.clean()  # Ensure validation before saving
-    #     super().save(*args, **kwargs)
+    def clean(self):
+        """
+        Custom validation to ensure only one active student in the same section.
+        """
+        if self.activity == '0':
+            # Check for existing '0' activity for the same student in the same section
+            existing = SectionStudent.objects.filter(
+                section=self.section, 
+                student=self.student, 
+                activity='0'
+            ).exclude(id=self.id)  # Exclude the current instance if editing
+            if existing.exists():
+                raise ValidationError("این دانشجو در این گروه هم‌اکنون با وضعیت 'در حال تحصیل' ثبت شده است.")
+
+    def save(self, *args, **kwargs):
+        """
+        Override save to ensure `clean` is called.
+        """
+        self.full_clean()  # Ensures `clean` is called before saving
+        super().save(*args, **kwargs)
         
     def __str__(self):
         return f'{self.student} در {self.section}'
@@ -127,12 +148,12 @@ class SectionTimeSlot(models.Model):
     ]
 
 
-    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='time_slots', verbose_name='گروه')
+    section = models.ForeignKey(Section, on_delete=models.SET_NULL, related_name='time_slots', verbose_name='گروه', null=True)
     day_of_week = models.CharField(max_length=1, choices=DAYS_OF_WEEK, verbose_name='روز')  # Store the selected day
     timeOfSection = models.CharField(max_length=127, null=True, verbose_name='زمان')
     place = models.CharField(max_length=63, null=True, verbose_name='مکان')
     class Meta:
-        verbose_name = "زمان سکشن" 
+        verbose_name = "زمان سکشن"
         verbose_name_plural = "زمان سکشن ها" 
 
     def __str__(self):
@@ -140,8 +161,8 @@ class SectionTimeSlot(models.Model):
 
     
 class Attendance(models.Model):
-    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='attendances', null=True, blank=True, verbose_name='سکشن')
-    section_student = models.ForeignKey(SectionStudent,related_name='attendances', on_delete=models.CASCADE, verbose_name='دانشجو')
+    section = models.ForeignKey(Section, on_delete=models.SET_NULL, related_name='attendances', null=True, blank=True, verbose_name='سکشن')
+    section_student = models.ForeignKey(SectionStudent,related_name='attendances', on_delete=models.SET_NULL, verbose_name='دانشجو', null=True)
     date = models.CharField(max_length=63, null=True, blank=True, verbose_name='تاریخ')  
     status = models.BooleanField(default=False, verbose_name='وضعیت')
     grg_date = models.DateField(auto_now_add=True, verbose_name='تاریخ')
@@ -153,8 +174,8 @@ class Attendance(models.Model):
 
 
 class Exam(models.Model):
-    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='exam', null=True, blank=True, verbose_name='گروه')
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='exams', null=True, blank=True, verbose_name='استاد')
+    section = models.ForeignKey(Section, on_delete=models.SET_NULL, related_name='exam', null=True, blank=True, verbose_name='گروه')
+    teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, related_name='exams', null=True, blank=True, verbose_name='استاد')
 
     exam_time = models.DateTimeField(verbose_name='تاریخ آزمون')
 
@@ -168,8 +189,8 @@ class Exam(models.Model):
 class HomeWork(models.Model):
     title = models.CharField(max_length=127, null=True, blank=True, verbose_name='عنوان')
     pdf = models.FileField(upload_to='GivenHomeWorks/files/', verbose_name='فایل پیوست', null=True , blank=True)  # 'documents/pdfs/' is the upload path
-    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='homeworks', null=True, blank=True, verbose_name='گروه')
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='homeworks', null=True, blank=True, verbose_name='استاد')
+    section = models.ForeignKey(Section, on_delete=models.SET_NULL, related_name='homeworks', null=True, blank=True, verbose_name='گروه')
+    teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, related_name='homeworks', null=True, blank=True, verbose_name='استاد')
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)  
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     expire_time = models.DateTimeField(verbose_name='مهلت تحویل')
@@ -186,8 +207,8 @@ class HomeWork(models.Model):
 
 
 class HomeWorkDocument(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='homeWorks', null=True, blank=True, verbose_name='دانش آموزش')
-    homeWork = models.ForeignKey(HomeWork,on_delete=models.CASCADE, related_name='documents', null=True, blank=True, verbose_name='تمرین')
+    student = models.ForeignKey(Student, on_delete=models.SET_NULL, related_name='homeWorks', null=True, blank=True, verbose_name='دانش آموزش')
+    homeWork = models.ForeignKey(HomeWork,on_delete=models.SET_NULL, related_name='documents', null=True, blank=True, verbose_name='تمرین')
     pdf = models.FileField(upload_to='HomeWorks/files/')  # 'documents/pdfs/' is the upload path
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -203,8 +224,8 @@ class HomeWorkDocument(models.Model):
         return f' تمرین تحویلی از {self.student} برای {self.homeWork.section.teacher}'
     
 class ExamDocument(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='exams', null=True, blank=True)
-    exam = models.ForeignKey(Exam,on_delete=models.CASCADE, related_name='exams', null=True, blank=True)
+    student = models.ForeignKey(Student, on_delete=models.SET_NULL, related_name='exams', null=True, blank=True)
+    exam = models.ForeignKey(Exam,on_delete=models.SET_NULL, related_name='exams', null=True, blank=True)
     pdf = models.FileField(upload_to='homeWorks/pdfs/')  # 'documents/pdfs/' is the upload path
     created_at = models.DateTimeField(auto_now_add=True)  
     updated_at = models.DateTimeField(auto_now=True)
@@ -219,8 +240,8 @@ class ExamDocument(models.Model):
         return f' ؛آزمون تحویلی از {self.student} برای {self.exam.section.teacher}'
     
 class Degree(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='degrees', null=True, blank=True)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='degrees', null=True, blank=True)
+    course = models.ForeignKey(Course, on_delete=models.SET_NULL, related_name='degrees', null=True, blank=True)
+    student = models.ForeignKey(Student, on_delete=models.SET_NULL, related_name='degrees', null=True, blank=True)
     pdf = models.FileField(upload_to='Degrees/', verbose_name='فایل پیوست مدرک', null=True , blank=True)  # 'documents/pdfs/' is the upload path
     score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True) 

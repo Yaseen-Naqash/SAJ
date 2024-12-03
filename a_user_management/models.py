@@ -143,8 +143,9 @@ class Student(Person):
     ]
 
     GENDER = [
-        ('0','دختر'),
-        ('1','پسر'),
+        ('0','پسر'),
+        ('1','دختر'),
+
     ]
     balance = models.IntegerField(default=0, null=True, verbose_name='(تومان) مبلغ')
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='students', null=True, blank=True, verbose_name="شعبه")

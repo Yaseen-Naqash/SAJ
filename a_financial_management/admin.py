@@ -132,7 +132,7 @@ class ReceiptAdmin(admin.ModelAdmin):
         
     )
 
-    search_fields = ['title', 'payer__first_name',] 
+    search_fields = ['title', 'payer__first_name','payer__last_name'] 
 
     #  CALCULATE THE SUM OF THE QUERY SET AMOPUNT AND SHOW IT AT TOP OF THE PAGE USING admin/receipt_changelist.html
     change_list_template = 'admin/receipt_changelist.html' 

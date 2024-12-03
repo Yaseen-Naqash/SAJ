@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
+from a_course_management.models import SectionStudent, HomeWork, HomeWorkDocument, Attendance
 
 class AdminPermissionMixin(admin.ModelAdmin):
     hidden_fields_group_map = {
@@ -215,7 +216,21 @@ class AdminPermissionMixin(admin.ModelAdmin):
             # Apply custom queryset logic for group2
             return qs.filter(active=False)
         elif request.user.groups.filter(name='استاد').exists():
-            # Apply custom queryset logic for group2
-            return qs.filter(active=False)
+
+            if self.model == SectionStudent:
+                # Filter the queryset for the logged-in teacher
+                return qs.filter(section__teacher=request.user)
+            
+            if self.model == HomeWork:
+                # Filter the queryset for the logged-in teacher
+                return qs.filter(teacher=request.user)
+            
+            if self.model == HomeWorkDocument:
+                # Filter the queryset for the logged-in teacher
+                return qs.filter(homeWork__teacher=request.user)
+            
+            if self.model == Attendance:
+                # Filter the queryset for the logged-in teacher
+                return qs.filter(section__teacher=request.user)
 
         return qs

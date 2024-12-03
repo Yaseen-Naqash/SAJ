@@ -16,6 +16,7 @@ from a_user_management.models import Student
 from decimal import Decimal
 from django.urls import path
 from django.shortcuts import redirect
+from SAJ.custom_permissions import AdminPermissionMixin
 
 
 
@@ -100,11 +101,16 @@ class SectionAdmin(admin.ModelAdmin):
         'course',
         'name',
         'teacher',
-        'section_status',
+        # 'section_status',
         'capacity',
-        'registered',
+        'registered_count',
+        'students_data',
         'end_section_button',
     ]
+
+    def registered_count(self, obj):
+        return obj.registered
+    registered_count.short_description = "ثبت نام شده"
 
     
     def end_section_button(self, obj):
@@ -114,6 +120,14 @@ class SectionAdmin(admin.ModelAdmin):
             url,
         )
     end_section_button.short_description = "اتمام دوره"
+
+    def students_data(self, obj):
+        # Construct the URL dynamically
+        url = reverse('admin:a_course_management_sectionstudent_changelist')
+        query_params = f"activity__exact=0&section__id__exact={obj.id}"
+        full_url = f"{url}?{query_params}"
+        return format_html('<a href="{}">مشاهده</a>', full_url)
+    students_data.short_description = "دانشجو ها"
 
     def get_urls(self):
         urls = super().get_urls()
@@ -225,10 +239,11 @@ class SectionAdmin(admin.ModelAdmin):
 
 
 @admin.register(SectionStudent)
-class SectionStudentAdmin(admin.ModelAdmin):
+class SectionStudentAdmin(AdminPermissionMixin, admin.ModelAdmin):
     
 
-    
+    readonly_fields = ('get_score',)
+
     list_display= [
         'student',
         'section',
@@ -247,7 +262,6 @@ class SectionStudentAdmin(admin.ModelAdmin):
     list_filter = (
         'activity',
         'section__course',
-        'section',
     )
 
     # Define the action method
@@ -303,6 +317,24 @@ class SectionStudentAdmin(admin.ModelAdmin):
     # Add the action to the actions list
     actions = [end_section]
 
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        # Check if the user belongs to the 'استاد' group
+        allowed_groups = ['کارمند', 'مدیر']
+        if not request.user.groups.filter(name__in=allowed_groups).exists():
+            # Remove the 'end_section' action if the user is not in the 'استاد' group
+            if 'end_section' in actions:
+                del actions['end_section']
+        return actions
+    
+    formfield_overrides = {
+        models.DateField: {'widget': jadmin.widgets.AdminjDateWidget},  # Use Jalali date picker in admin
+    }
+
+    def get_score(self, obj):
+        return obj.score  # Access the `score` property
+    get_score.short_description = 'نمره کل' 
+
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
 
@@ -348,13 +380,13 @@ class ExamDocumentAdmin(admin.ModelAdmin):
 
 
 @admin.register(HomeWork)
-class HomeWorkAdmin(admin.ModelAdmin):
+class HomeWorkAdmin(AdminPermissionMixin, admin.ModelAdmin):
     formfield_overrides = {
         models.DateTimeField: {'widget': jadmin.widgets.AdminSplitjDateTime},  # Use Jalali date picker in admin
     }
 
 @admin.register(HomeWorkDocument)
-class HomeWorkDocumentAdmin(admin.ModelAdmin):
+class HomeWorkDocumentAdmin(AdminPermissionMixin, admin.ModelAdmin):
     
     
     list_display= [
@@ -384,7 +416,7 @@ class HomeWorkDocumentAdmin(admin.ModelAdmin):
 
 
 @admin.register(Attendance)
-class AttendanceAdmin(admin.ModelAdmin):
+class AttendanceAdmin(AdminPermissionMixin, admin.ModelAdmin):
     list_display = ('get_students' ,'section' , 'date', 'status', 'session')
 
     def get_students(self, obj):
