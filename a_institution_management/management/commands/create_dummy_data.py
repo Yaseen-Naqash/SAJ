@@ -7,6 +7,7 @@ from a_institution_management.models import Branch
 from a_course_management.models import Course, Section, SectionTimeSlot, SectionStudent, HomeWork
 
 from datetime import datetime, timedelta
+from django.contrib.auth.models import Group, Permission
 
 # Predefined data lists
 BOY_FIRST_NAMES = ["رضا", "علی", "طاها", "محمد", "نیما", "سینا"
@@ -57,6 +58,10 @@ class Command(BaseCommand):
 
 
         # Create instances for various models
+        self.create_groups()
+        self.stdout.write(f"GROUPS CREATED")
+
+
         self.create_students()
         self.stdout.write(f"STUDENTS CREATED")
 
@@ -132,7 +137,7 @@ class Command(BaseCommand):
                 phone=phone,
                 date_of_birth=timezone.now().date() - timezone.timedelta(days=random.randint(6000, 20000)),
             )
-            self.stdout.write(f"Created manager: {manager}")
+            manager.set_password("admin")
         
 
     def create_employees(self, count=2):
@@ -150,7 +155,7 @@ class Command(BaseCommand):
                 phone=phone,
                 date_of_birth=timezone.now().date() - timezone.timedelta(days=random.randint(6000, 20000)),
             )
-            self.stdout.write(f"Created employee: {employee}")
+            employee.set_password("admin")
 
 
     def create_teachers(self, count=5):
@@ -168,10 +173,9 @@ class Command(BaseCommand):
                 phone=phone,
                 date_of_birth=timezone.now().date() - timezone.timedelta(days=random.randint(6000, 20000)),
             )
-            self.stdout.write(f"Created teacher: {teacher}")
+            teacher.set_password("admin")
 
 
-        self.stdout.write(self.style.SUCCESS('Dummy data created successfully!'))
 
         
     def create_sample_courses(self):
@@ -483,4 +487,25 @@ class Command(BaseCommand):
 
         print("Successfully created 500 receipts.")
 
+    def create_groups(self):
 
+        teacher_permissions_ids = [60, 64, 69, 70, 71, 72, 74, 76, 80, 82, 84, 88, 101, 102, 103, 104]
+        owner_permissions_ids = []
+        manager_permissions_ids = [58, 60, 89, 90, 91, 92, 93, 94, 95, 96, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 105, 106, 108, 97, 98, 99, 100, 101, 102, 103, 104, 41, 42, 43, 44, 49, 50, 51, 52, 53, 54, 55, 56, 4]
+        employee_permissions_ids = [58, 60, 92, 96, 61, 62, 64, 72, 76, 78, 80, 81, 82, 84, 85, 86, 87, 88, 105, 108, 100, 101, 102, 103, 104, 49, 50, 52, 56]
+
+        teacher_group = Group.objects.create(name='استاد')
+        teacher_permissions = Permission.objects.filter(id__in=teacher_permissions_ids)
+        teacher_group.permissions.set(teacher_permissions)
+
+        owner_group = Group.objects.create(name='مالک')
+        owner_permissions = Permission.objects.all()
+        owner_group.permissions.set(owner_permissions)
+
+        manager_group = Group.objects.create(name='مدیر')
+        manager_permissions = Permission.objects.filter(id__in=manager_permissions_ids)
+        manager_group.permissions.set(manager_permissions)
+
+        employee_group = Group.objects.create(name='کارمند')
+        employee_permissions = Permission.objects.filter(id__in=employee_permissions_ids)
+        employee_group.permissions.set(employee_permissions)

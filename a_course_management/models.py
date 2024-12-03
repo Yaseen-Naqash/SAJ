@@ -63,7 +63,7 @@ class Section(models.Model):
 
     @property
     def registered(self):
-        return self.students.count()
+        return self.sectionstudent_set.filter(activity='0').count()
 
     class Meta:
         verbose_name = "گروه"

@@ -94,7 +94,7 @@ class SectionStudentInline(admin.TabularInline):
 
 
 @admin.register(Section)
-class SectionAdmin(admin.ModelAdmin):
+class SectionAdmin(AdminPermissionMixin, admin.ModelAdmin):
 
     
     list_display= [
@@ -107,9 +107,32 @@ class SectionAdmin(admin.ModelAdmin):
         'students_data',
         'end_section_button',
     ]
+    def get_list_display(self, request):
+        """
+        Modify the list_display to conditionally hide 'end_section_button' 
+        based on whether the user is in the 'استاد' group.
+        """
+        list_display = super().get_list_display(request)
+        
+        if request.user.groups.filter(name='استاد').exists():
 
+            # Remove 'end_section_button' from list_display if the user is not in 'استاد' group
+            list_display = [field for field in list_display if field != 'end_section_button']
+        
+        return list_display
+
+    
     def registered_count(self, obj):
-        return obj.registered
+        if obj.registered > obj.capacity:
+            color = 'red'
+        elif obj.registered == obj.capacity:
+            color = 'yellow'
+        else:
+            color = 'green'
+        # Return the value wrapped in styled HTML
+        return format_html(
+            '<span style="color: {};">{}</span>', color, obj.registered
+        )    
     registered_count.short_description = "ثبت نام شده"
 
     
@@ -228,7 +251,7 @@ class SectionAdmin(admin.ModelAdmin):
     ]
     list_filter = (
         'section_status',
-        'course',
+        'teacher',
     )
 
 

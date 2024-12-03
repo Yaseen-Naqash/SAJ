@@ -98,7 +98,7 @@ class Teacher(Person):
 
     class Meta:
         verbose_name = "استاد"  
-        verbose_name_plural = "2- استاتید"  
+        verbose_name_plural = "2- اساتید"  
     def __str__(self):
         return f"استاد {self.first_name} {self.last_name}"
     

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
-from a_course_management.models import SectionStudent, HomeWork, HomeWorkDocument, Attendance
+from a_course_management.models import SectionStudent, HomeWork, HomeWorkDocument, Attendance, Section
 
 class AdminPermissionMixin(admin.ModelAdmin):
     hidden_fields_group_map = {
@@ -153,7 +153,15 @@ class AdminPermissionMixin(admin.ModelAdmin):
 
     readonly_fields_group_map = {
         'استاد': {
-            'student': ['phone'],
+            'sectionstudent': [
+                'section',
+                'student',
+                'activity',
+                'exam_score',
+                'start_date',
+                'end_date',
+                'score',
+                ],
             'teacher': ['phone'],
         },
 
@@ -207,14 +215,14 @@ class AdminPermissionMixin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         if request.user.groups.filter(name='مالک').exists():
             # Apply custom queryset logic for group1
-            return qs.filter(active=True)
+            return qs
         elif request.user.groups.filter(name='مدیر').exists():
             # Apply custom queryset logic for group2
-            return qs.filter(active=False)
+            return qs
 
         elif request.user.groups.filter(name='کارمند').exists():
             # Apply custom queryset logic for group2
-            return qs.filter(active=False)
+            return qs
         elif request.user.groups.filter(name='استاد').exists():
 
             if self.model == SectionStudent:
@@ -232,5 +240,16 @@ class AdminPermissionMixin(admin.ModelAdmin):
             if self.model == Attendance:
                 # Filter the queryset for the logged-in teacher
                 return qs.filter(section__teacher=request.user)
+            
+            if self.model == Section:
+                # Filter the queryset for the logged-in teacher
+
+                group = Group.objects.get(name='مدیر')
+                permissions = group.permissions.all()
+                permission_list = [permission.id for permission in permissions]
+                print(permission_list)
+
+
+                return qs.filter(teacher=request.user)
 
         return qs
