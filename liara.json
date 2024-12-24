@@ -1,0 +1,23 @@
+{
+    "build": {
+       "location": "germany"
+    },
+
+
+    "disks":[
+        {
+            "name": "database",
+            "mountTo": "database"
+        },
+        {
+            "name": "media",
+            "mountTo": "media"
+        }
+    ],
+    "app": "mydjango-blog",
+    
+    "django": {
+        "settingsFile": "SAJ/settings.py"
+    }
+      
+  }

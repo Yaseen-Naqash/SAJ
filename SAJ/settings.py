@@ -117,7 +117,7 @@ AUTH_USER_MODEL = 'a_user_management.Person'
 LANGUAGE_CODE = 'fa-ir'
 
 import locale
-locale.setlocale(locale.LC_ALL, "Persian_Iran.UTF-8")
+locale.setlocale(locale.LC_ALL, "fa_IR.UTF-8")
 
 TIME_ZONE = 'Asia/Tehran'
 DATE_FORMAT = 'Y/m/d'  # For '2024/08/22'

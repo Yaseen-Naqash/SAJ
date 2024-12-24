@@ -156,6 +156,7 @@ class Command(BaseCommand):
                 date_of_birth=timezone.now().date() - timezone.timedelta(days=random.randint(6000, 20000)),
             )
             employee.set_password("admin")
+            employee.save()
 
 
     def create_teachers(self, count=5):
