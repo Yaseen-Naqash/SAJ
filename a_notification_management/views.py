@@ -17,7 +17,7 @@ def home(request):
         student = request.user.student
     else:
         messages.error(request,'لطفا با یک حساب به عنوان دانشجو وارد شوید!')
-        return redirect('student_login_url')
+        return redirect('login_url')
     
     news = News.objects.all()
 

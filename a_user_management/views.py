@@ -32,38 +32,15 @@ def calculate_age(birth_day_date):
 
     return age
 
-@login_required
-def home(request):
 
-    # # Success message
-    # messages.success(request, 'موفق : اکانت شما ساخته شد.')
-
-    # # Error message
-    # messages.error(request, 'خطا : شماره اشتباه است.')
-
-    # # Info message
-    # messages.info(request, 'This is some information.')
-
-    # # Warning message
-    # messages.warning(request, 'This is a warning.')
-
-
-    context = {}
-    return render(request,'base.html',context)
 
 def logout_command(request):
 
-    # teachers = Teacher.objects.all()
-    # for teacher in teachers:
-    #     if not teacher.password.startswith('pbkdf2_'):  # Assuming using PBKDF2 as the default hashing algorithm
-    #         teacher.set_password(teacher.password)  # Hash the current password
-    #         teacher.save()
     
     logout(request)
     return redirect('student_login_url')
 
-
-def students_login(request):
+def login_view(request):
     if request.method == 'POST':
 
 
@@ -72,10 +49,10 @@ def students_login(request):
 
 
         try:
-            student = Student.objects.get(phone=phone)
+            student = Student.objects.get(username=phone)
         except Student.DoesNotExist:
             messages.error(request, 'خطا : اطلاعات شما اشتباه است.')  
-            return redirect('student_login_url')  
+            return redirect('   login_url')  
 
         if student and student.password == password:
             login(request, student)
@@ -84,17 +61,7 @@ def students_login(request):
         else:
             messages.error(request, 'خطا : اطلاعات شما اشتباه است.')  
 
-    context = {'login_method': 'student'}
-    return render(request, 'login.html', context)
-
-
-
-def teachers_login(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-    context = {'login_method':'teacher'}
-    return render(request,'login.html',context)
+    return render(request, 'login.html')
 
 def register(request):
     if request.method == 'POST':
@@ -150,9 +117,6 @@ def register(request):
     context = {}
     return render(request,'register.html',context)
 
-
-from django.utils import timezone
-
 def generate_verification_code(phone_number):
     verification = PhoneVerification(phone_number=phone_number)
     verification.generate_code()
@@ -171,8 +135,6 @@ def verify_code(phone_number, code):
         return True
     else:
         return False
-    
-
 
 def send_code(request):
     if request.method == 'POST':

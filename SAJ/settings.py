@@ -59,7 +59,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'SAJ.urls'
-LOGIN_URL = '/authentication/student-login/'
+LOGIN_URL = '/authentication/login/'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

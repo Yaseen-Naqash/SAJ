@@ -24,13 +24,7 @@
       {% endif %}
     <div class="box">
         <h2>خانه برنامه نویسان اهواز</h2>
-        {% if login_method == 'student' %}
             <h3>صفحه ورود دانشجو </h3>
-        {% elif login_method == 'teacher' %}
-            <h3>صفحه ورود استاد </h3>
-        {% else %}
-            <h3>خطا</h3>
-        {% endif %}
 
         <form method="POST" action="">
           {% csrf_token %}
@@ -49,15 +43,8 @@
           </div>
         </form>
 
-        {% if login_method == 'student' %}
-        <p>.برای ورود به پنل اساتید <a href="{% url 'teacher_login_url' %}" style="color: #6c6efd;">اینجا</a> کلیک کنید</p>
-        {% elif login_method == 'teacher' %}
-        <p>.برای ورود به پنل دانشجو <a href="{% url 'student_login_url' %}" style="color: #6c6efd;">اینجا</a> کلیک کنید</p>
 
-        {% else %}
-        <h3>  خطا </h3>
 
-        {% endif %}
 
     </div>
     <script src="{% static 'js/base.js' %}"></script>
