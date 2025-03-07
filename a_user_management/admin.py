@@ -21,6 +21,24 @@ class ReceiptInline(admin.TabularInline):
     exclude  = ['description', 'sender_account', 'receiver_account', 'transaction_id']  # Only these fields will be shown.
 
 
+# Define a custom filter
+class TeacherFilter(admin.SimpleListFilter):
+    title = ('استاد')  # The title of the filter
+    parameter_name = 'teacher'
+
+    def lookups(self, request, model_admin):
+        if request.user.groups.filter(name='استاد').exists():
+            return [(request.user.id, request.user.get_full_name())]  # Only show the logged-in teacher
+
+        # If the user is not a teacher, show all teachers
+        return [(teacher.id, teacher.get_full_name()) for teacher in Teacher.objects.all()]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(teacher_id=self.value())
+        return queryset
+
+
 # TEACHER
 @admin.register(Teacher)
 class TeacherAdmin(AdminPermissionMixin, admin.ModelAdmin):
@@ -143,7 +161,7 @@ class StudentAdmin(AdminPermissionMixin, admin.ModelAdmin):
         else:
             return 'بی حساب'
     
-    balance_status.short_description = 'موجودی' 
+    balance_status.short_description = 'موجودی'
 
     # THIS IS WHAT TO APPLY TO ADD A JALALI DATE PICKER IN ADMIN PANEL
     formfield_overrides = {

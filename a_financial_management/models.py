@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 from a_user_management.models import Student
+from a_course_management.models import Section
 from django.utils import timezone
 from datetime import timedelta
 import jdatetime
@@ -70,6 +71,15 @@ class Receipt(models.Model):
         ('3', 'درگاه پرداخت'), 
         ('4', 'تخفیفی'),
     ]
+    REASON = [
+        ('0', "بابت قسط شهریه"),
+        ('1', "بابت شهریه"),
+        ('2', "بابت کلاس تقویتی"), 
+        ('3', "بابت کمک به آموزشگاه"), 
+        ('4', "بابت خسارت"),
+        ('5', "نامشخص"),
+
+    ]
 
 
     receipt_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
@@ -81,9 +91,10 @@ class Receipt(models.Model):
     title = models.CharField(max_length=63, null=True, verbose_name='عنوان')
     transaction_id = models.CharField(max_length=63, unique=True, null=True, blank=True, verbose_name='شماره پیگیری')
     formatted_amount = models.CharField(max_length=127, null=True, verbose_name='(تومان) مبلغ')
-
+    reason = models.CharField(max_length=1, choices=REASON, null=True, blank=True, default='5', verbose_name='بابت')
+    section = models.ForeignKey(Section, related_name='receipts', on_delete=models.SET_NULL, null=True, blank=True, verbose_name='دوره')
     amount = models.DecimalField(max_digits=11, decimal_places=0, null=True, verbose_name='(تومان) مبلغ')
-    payer = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, verbose_name='پرداخت کننده')
+    payer = models.ForeignKey(Student, related_name='receipts', on_delete=models.SET_NULL, null=True, verbose_name='پرداخت کننده')
     # sender_account = models.CharField(max_length=63, null=True, blank=True, verbose_name='ارسال شده از حساب')
     # receiver_account = models.CharField(max_length=63, null=True, blank=True, verbose_name='دریافت شده در حساب')
     created_method = models.CharField(max_length=1, choices=[('0', 'اتوماتیک'), ('1', 'دستی')], default='1', verbose_name='روش ثبت')

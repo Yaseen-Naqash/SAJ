@@ -63,7 +63,7 @@ class Section(models.Model):
 
     @property
     def registered(self):
-        return self.sectionstudent_set.filter(activity='0').count()
+        return self.section_students.filter(activity='0').count()
 
     class Meta:
         verbose_name = "گروه"
@@ -86,8 +86,8 @@ class SectionStudent(models.Model):
 
     ]
 
-    section = models.ForeignKey(Section, on_delete=models.SET_NULL, verbose_name='گروه', null=True)
-    student = models.ForeignKey(Student, related_name='section_student', on_delete=models.SET_NULL, verbose_name='دانشجو', null=True)
+    section = models.ForeignKey(Section, on_delete=models.SET_NULL,related_name='section_students', verbose_name='گروه', null=True)
+    student = models.ForeignKey(Student, related_name='section_students', on_delete=models.SET_NULL, verbose_name='دانشجو', null=True)
     activity = models.CharField(default=0,max_length=1,choices=ACTIVITY, verbose_name="وضعیت دانشجو در این دوره")
 
     date_joined = models.DateField(auto_now_add=True)  # Additional fields
@@ -122,7 +122,7 @@ class SectionStudent(models.Model):
                 activity='0'
             ).exclude(id=self.id)  # Exclude the current instance if editing
             if existing.exists():
-                raise ValidationError("این دانشجو در این گروه هم‌اکنون با وضعیت 'در حال تحصیل' ثبت شده است.")
+                raise ValidationError(" دانشجو در این گروه اکنون با وضعیت 'در حال تحصیل' ثبت شده است.")
 
     def save(self, *args, **kwargs):
         """

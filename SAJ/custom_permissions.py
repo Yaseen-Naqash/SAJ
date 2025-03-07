@@ -182,7 +182,6 @@ class AdminPermissionMixin(admin.ModelAdmin):
 
         for group_name, model_fields in self.hidden_fields_group_map.items():
             if request.user.groups.filter(name=group_name).exists():
-                print (model_fields.get(model_name, []))
                 return model_fields.get(model_name, [])
         return []
 
@@ -247,7 +246,6 @@ class AdminPermissionMixin(admin.ModelAdmin):
                 group = Group.objects.get(name='مدیر')
                 permissions = group.permissions.all()
                 permission_list = [permission.id for permission in permissions]
-                print(permission_list)
 
 
                 return qs.filter(teacher=request.user)

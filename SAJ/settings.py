@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'a_course_management',
     'a_notification_management',
     'a_financial_management',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [
@@ -155,3 +156,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Media settings
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+
+# Set session timeout to 5 minutes
+# SESSION_COOKIE_AGE = 300  # 300 seconds = 5 minutes
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Optional: Logout when the browser closes

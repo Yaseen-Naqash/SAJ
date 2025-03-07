@@ -159,7 +159,7 @@ class Student(Person):
 
     @property
     def latest_course_title(self):
-        latest_section_student = self.section_student.filter(activity='1').order_by('-id').first()
+        latest_section_student = self.section_students.filter(activity='1').order_by('-id').first()
         if latest_section_student:
             return latest_section_student.section.course.title
         return "بدون دوره"

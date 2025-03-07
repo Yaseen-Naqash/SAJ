@@ -1,3 +1,4 @@
+from django.forms import ValidationError
 from django.utils import timezone
 from django.utils.html import format_html
 from django.urls import reverse
@@ -6,6 +7,7 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.contrib import admin
 from .models import Course, Section, SectionStudent, SectionTimeSlot, Exam, HomeWork, HomeWorkDocument, ExamDocument, Degree, Attendance
+from a_user_management.admin import TeacherFilter
 from django_jalali.forms import jdatetime
 import django_jalali.admin as jadmin # jalali date picker
 from django.db import models  
@@ -17,8 +19,8 @@ from decimal import Decimal
 from django.urls import path
 from django.shortcuts import redirect
 from SAJ.custom_permissions import AdminPermissionMixin
-
-
+from django.contrib.humanize.templatetags.humanize import intcomma
+from django.template.defaultfilters import timesince
 
 
 def process_section_students(request, queryset):
@@ -60,6 +62,8 @@ def process_section_students(request, queryset):
 # admin.site.register(SectionTimeSlot)
 
 
+
+
 class StudentInline(admin.TabularInline):
     model = Student
     extra = 0
@@ -92,6 +96,24 @@ class SectionStudentInline(admin.TabularInline):
     def get_queryset(self, request):
         return SectionStudent.objects.none()
 
+from django.shortcuts import redirect, get_object_or_404
+from django.template.response import TemplateResponse
+from django import forms
+from django.forms import modelformset_factory
+from django.http import HttpResponseRedirect
+
+class SectionStudentScoreForm(forms.ModelForm):
+    class Meta:
+        model = SectionStudent
+        fields = ['class_score', 'exam_score']
+
+    
+
+SectionStudentScoreFormSet = modelformset_factory(
+    SectionStudent,
+    form=SectionStudentScoreForm,
+    extra=0,  # No extra forms
+)
 
 @admin.register(Section)
 class SectionAdmin(AdminPermissionMixin, admin.ModelAdmin):
@@ -105,8 +127,38 @@ class SectionAdmin(AdminPermissionMixin, admin.ModelAdmin):
         'capacity',
         'registered_count',
         'students_data',
+        'enter_scores_button',
         'end_section_button',
+        
     ]
+    def enter_scores_view(self, request, section_id):
+        section = get_object_or_404(Section, pk=section_id)
+        # Filter for active students only (or adjust as needed)
+        queryset = section.section_students.filter(activity='0')
+        formset = SectionStudentScoreFormSet(queryset=queryset)
+        if request.method == "POST":
+            formset = SectionStudentScoreFormSet(request.POST, queryset=queryset)
+            if formset.is_valid():
+                formset.save()
+                self.message_user(request, "نمرات با موفقیت به‌روزرسانی شدند.", messages.SUCCESS)
+                # Redirect back to the section change page
+                return redirect('admin:a_course_management_section_changelist')
+            else:
+                self.message_user(request, f"خطا در به‌روزرسانی نمرات: {formset.errors}", messages.ERROR)
+
+        context = {
+            **self.admin_site.each_context(request),
+            'formset': formset,
+            'section': section,
+            'opts': self.model._meta,
+            
+        }
+        return TemplateResponse(request, "admin/enter_scores.html", context)
+
+    def enter_scores_button(self, obj):
+        url = reverse('admin:enter_scores', args=[obj.id])
+        return format_html('<a class="button" href="{}">ثبت نمرات</a>', url)
+    enter_scores_button.short_description = "ثبت نمرات"
     def get_list_display(self, request):
         """
         Modify the list_display to conditionally hide 'end_section_button' 
@@ -160,6 +212,12 @@ class SectionAdmin(AdminPermissionMixin, admin.ModelAdmin):
                 self.admin_site.admin_view(self.end_section_view),
                 name='end_section',
             ),
+
+            path(
+                'enter_scores/<int:section_id>/',
+                self.admin_site.admin_view(self.enter_scores_view),
+                name='enter_scores',
+            ),
         ]
         return custom_urls + urls
 
@@ -182,22 +240,77 @@ class SectionAdmin(AdminPermissionMixin, admin.ModelAdmin):
 
     # Method to display the list of students with links in the section edit view
     def display_students(self, obj):
-        students = obj.students.all()  # Get all students in the section
+        students = Student.objects.filter(section_students__section=obj, section_students__activity='0')
+        # students = obj.students.all()  # Get all students in the section
+
         if students:
-            # Generate a list of clickable links for each student
-            return mark_safe(
-                '<br>'.join([
-                    format_html('<a href="{}"> {} </a>', 
-                                reverse('admin:a_user_management_student_change', args=[student.pk]), 
-                                student.get_full_name(),
-                                )
-                    for student in students
-                ])
-            )
+                        # Create table header
+            table_html = """
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>شماره</th>
+                            <th>نام دانشجو</th>
+                            <th>آخرین قسط پرداختی</th>
+                            <th>بدهی</th>
+                            <th>جزئیات بیشتر</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            """
+
+            # Populate table rows
+            for index, student in enumerate(students, start=1):
+                latest_receipt = student.receipts.filter(section=obj).order_by('-created_at').first()  # Fetch the latest receipt by created_at
+
+                if latest_receipt:
+                    # Calculate the time passed since the latest receipt was created
+                    time_since = timesince(latest_receipt.created_at)
+                else:
+                    time_since = "ندارد"  # If no receipts, display "ندارد"
+
+
+                debt = student.balance  # Assuming a method to calculate debt
+                
+                # Format debt with commas
+                formatted_debt = "{:,}".format(int(debt))
+
+                # Determine color based on debt sign
+                if debt > 0:
+                    debt_html = format_html('<span style="color: green;">{}</span>', formatted_debt)
+                elif debt < 0:
+                    debt_html = format_html('<span style="color: red;">{}</span>', formatted_debt.lstrip('-'))
+                else:
+                    debt_html = format_html('<span>{}</span>', formatted_debt)
+
+
+
+                table_html += format_html(
+                    """
+                    <tr>
+                        <td>{}</td>
+                        <td><a href="{}">{}</a></td>
+                        <td>{}</td>
+                        <td>{}</td>
+                        <td><a href="{}" class="button">مشاهده جزئیات</a></td>
+                    </tr>
+                    """,
+                    index,
+                    reverse('admin:a_user_management_student_change', args=[student.pk]),
+                    student.get_full_name(),
+                    time_since,
+                    debt_html,
+                    reverse('admin:a_financial_management_receipt_changelist') + f'?payer__id__exact={student.id}'  # Link to a detailed view
+                ) 
+
+            # Close table
+            table_html += "</tbody></table>"
+
+            return mark_safe(table_html)
         else:
             return "این گروه دانشجویی ندارد"
 
-    display_students.short_description = "دانشجو های این گروه"
+    display_students.short_description = "دانشجو های در حال تحصیل این گروه"
 
     
 
@@ -251,15 +364,44 @@ class SectionAdmin(AdminPermissionMixin, admin.ModelAdmin):
     ]
     list_filter = (
         'section_status',
-        'teacher',
+        TeacherFilter,
     )
 
 
     inlines = [SectionStudentInline, SectionTimeSlotInline, ]
+    
+    def save_formset(self, request, form, formset, change):
+        try:
+            super().save_formset(request, form, formset, change)
+        except ValidationError as e:
+            # Extract and clean up the error message
+            error_messages = e.message_dict.get('__all__', e.messages)  # Get messages under '__all__'
+            clean_message = " ".join(error_messages)  # Join messages into a single string
+            clean_message = clean_message.replace('\u200c', '')  # Remove zero-width spaces
+            self.message_user(request, f"دانشجو اضافه نشد: {clean_message}", level='error')
     formfield_overrides = {
         models.DateField: {'widget': jadmin.widgets.AdminjDateWidget},  # Use Jalali date picker in admin
     }
 
+
+
+# Define a custom filter for the course
+class CourseFilter(admin.SimpleListFilter):
+    title = ('دوره')  # The title of the filter
+    parameter_name = 'section__course'
+
+    def lookups(self, request, model_admin):
+        if request.user.groups.filter(name='استاد').exists():
+            # If the user is a teacher, show only courses associated with them
+            return [(section.course.id, section) for section in Section.objects.filter(teacher=request.user)]
+        else:
+            # If the user is not a teacher, show all courses
+            return [(section.course.id, section) for section in Section.objects.all()]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(section__course_id=self.value())
+        return queryset
 
 @admin.register(SectionStudent)
 class SectionStudentAdmin(AdminPermissionMixin, admin.ModelAdmin):
@@ -284,7 +426,7 @@ class SectionStudentAdmin(AdminPermissionMixin, admin.ModelAdmin):
 
     list_filter = (
         'activity',
-        'section__course',
+        CourseFilter,  # Add the custom course filter
     )
 
     # Define the action method
@@ -432,9 +574,7 @@ class HomeWorkDocumentAdmin(AdminPermissionMixin, admin.ModelAdmin):
     ]
 
     list_filter = (
-        'homeWork',
         'seen',
-        'homeWork__section',
     )
 
 
