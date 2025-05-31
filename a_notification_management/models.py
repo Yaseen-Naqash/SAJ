@@ -1,6 +1,7 @@
 from django.db import models
-from a_user_management.models import Person, Teacher, Employee
+from a_user_management.models import Person
 from a_course_management.models import Section
+from a_institution_management.models import Branch
 # Create your models here.
 
 class News(models.Model):
@@ -10,6 +11,7 @@ class News(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)  
     updated_at = models.DateTimeField(auto_now=True)   
     author = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='news', null=True, blank=True)
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, related_name='news')
 
     class Meta:
         verbose_name = "خبر" 
@@ -25,6 +27,7 @@ class Notification(models.Model):
     updated_at = models.DateTimeField(auto_now=True)   
     author = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='notification', null=True, blank=True)
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='notification', null=True, blank=True)
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, related_name='notifications')
 
     def __str__(self):
         return f"اطلاعیه: {self.title} از {self.author.first_name} {self.author.last_name}"

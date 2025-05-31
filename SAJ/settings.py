@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'a_course_management',
     'a_notification_management',
     'a_financial_management',
+    'a_survey_management',
     'widget_tweaks',
 ]
 
@@ -71,6 +72,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'a_institution_management.context_processors.branches_context',
             ],
         },
     },

@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from .models import Course, Degree, Section
 from a_user_management.models import Student
-
+from django.shortcuts import redirect
+from django.contrib import messages
 
 from django.contrib.admin.views.decorators import staff_member_required
 # Create your views here.
@@ -30,9 +31,4 @@ def my_courses(request):
     context = {'sections':sections, 'student':student}
     return render(request,'my_courses.html',context)
 
-def my_degrees(request):
-    student = request.user.student
-    degrees = Degree.objects.filter(student = student)
-    
-    return render(request, 'my_degrees.html')
 

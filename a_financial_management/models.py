@@ -6,6 +6,7 @@ from django.utils import timezone
 from datetime import timedelta
 import jdatetime
 import random
+from a_institution_management.models import Branch
 # Create your models here.
 
 def generate_custom_id():
@@ -104,6 +105,7 @@ class Receipt(models.Model):
     jdate = models.CharField(max_length=15, default=jdatetime.date.today().strftime('%Y/%m/%d'), verbose_name='تاریخ')
     confirmed = models.BooleanField(default=False, verbose_name='تایید شده')
     description = models.TextField(max_length=511, default='', null=True, blank=True, verbose_name='توضیحات')
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, related_name='receipts')
 
 
     def save(self, *args, **kwargs):

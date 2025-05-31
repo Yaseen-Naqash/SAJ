@@ -7,7 +7,7 @@ from django.contrib.admin import SimpleListFilter
 import jdatetime
 from django.template.response import TemplateResponse
 from datetime import datetime
-
+from SAJ.custom_permissions import AdminPermissionMixin
 class JalaliDateRangeFilter(SimpleListFilter):
     title = 'بازه زمانی'  # Title for your filter in the admin panel
     parameter_name = 'created_at_range'
@@ -111,7 +111,7 @@ class CustomDateFilter(SimpleListFilter):
 
 
 @admin.register(Receipt)
-class ReceiptAdmin(admin.ModelAdmin):
+class ReceiptAdmin(AdminPermissionMixin, admin.ModelAdmin):
     exclude = ('amount',)
     autocomplete_fields = ('payer',)
     list_display = (

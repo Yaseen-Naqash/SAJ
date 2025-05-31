@@ -117,18 +117,27 @@ SectionStudentScoreFormSet = modelformset_factory(
 
 @admin.register(Section)
 class SectionAdmin(AdminPermissionMixin, admin.ModelAdmin):
-
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('create-attendance/<int:section_id>/', self.admin_site.admin_view(self.create_attendance), name='create-attendance'),
+            path('enter-scores/<int:section_id>/', self.admin_site.admin_view(self.enter_scores_view), name='enter_scores'),
+            path('end_section/<int:section_id>/', self.admin_site.admin_view(self.end_section_view), name='end_section'),
+        ]
+        return custom_urls + urls
     
     list_display= [
         'course',
         'name',
         'teacher',
+        'method',
         # 'section_status',
         'capacity',
         'registered_count',
         'students_data',
         'enter_scores_button',
         'end_section_button',
+        'attendance_button',
         
     ]
     def enter_scores_view(self, request, section_id):
@@ -204,22 +213,6 @@ class SectionAdmin(AdminPermissionMixin, admin.ModelAdmin):
         return format_html('<a href="{}">مشاهده</a>', full_url)
     students_data.short_description = "دانشجو ها"
 
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path(
-                'end_section/<int:section_id>/',
-                self.admin_site.admin_view(self.end_section_view),
-                name='end_section',
-            ),
-
-            path(
-                'enter_scores/<int:section_id>/',
-                self.admin_site.admin_view(self.enter_scores_view),
-                name='enter_scores',
-            ),
-        ]
-        return custom_urls + urls
 
     def end_section_view(self, request, section_id):
         section = Section.objects.get(pk=section_id)
@@ -319,15 +312,31 @@ class SectionAdmin(AdminPermissionMixin, admin.ModelAdmin):
         return self.display_students(obj)  # Reuse the same method for the list view
 
 
-    def create_attendance(self, request, section_id, date=None):
-        section = self.get_object(request, section_id)
-        if not date:
-            # Get the current Jalali date and set it using the custom field
-            jalali_date = jdatetime.date.today()  # Get the current Jalali date
-            date = jalali_date.strftime('%Y/%m/%d')
-            
 
-        session_value = f'جلسه {section.session_number+1}'
+    
+
+
+
+
+    
+    def attendance_button(self, obj):
+        create_attendance_url = reverse('admin:create-attendance', kwargs={'section_id': obj.id})  
+        date = jdatetime.date.today().strftime('%Y/%m/%d')  # Current Jalali date
+        session = f'جلسه {obj.session_number+1}'
+
+        return format_html(
+            '<a class="button" href="{}" onclick="return confirm(\'آیا برای ثبت حضور غیاب این گروه در تاریخ {} و {} مطمئن هستید؟\')">'
+            'ثبت حضوروغیاب</a>',
+            create_attendance_url, date, session
+        )
+
+    attendance_button.short_description = "ثبت حضوروغیاب"
+
+    def create_attendance(self, request, section_id):
+        section = Section.objects.get(id=section_id)
+        date = jdatetime.date.today().strftime('%Y/%m/%d')  # Current Jalali date
+        session_value = f'جلسه {section.session_number + 1}'
+
         for student in section.students.all():
             section_student = SectionStudent.objects.get(section=section, student=student)
             attendance, created = Attendance.objects.get_or_create(
@@ -335,25 +344,16 @@ class SectionAdmin(AdminPermissionMixin, admin.ModelAdmin):
                 section_student=section_student,
                 date=date,
                 session=session_value,
-                )
-            
-        if  created:
-            section.session_number += 1  # Increment the session number by one
-            section.save()  # Save the updated section
-        messages.success(request, f' سند حضور غیاب برای {section} در تاریخ {date} ایجاد شد.')
-        return redirect(f'/admin/a_course_management/section/{section_id}/change/')
-    
-    # Custom admin action to mark attendance for today
-    def mark_attendance_today(self, request, queryset):
-        for section in queryset:
-            self.create_attendance(request, section.id)
-        return redirect('/admin/a_course_management/attendance/')
-    mark_attendance_today.short_description = 'ثبت حضور غیاب برای این سکشن'
+            )
 
-    # Add a custom action in the admin panel
-    actions = ['mark_attendance_today']
+        if created:
+            section.session_number += 1  # Increment session number
+            section.save()
 
-    
+        messages.success(request, f'سند حضور غیاب برای {section} در تاریخ {date} ایجاد شد.')
+
+        # Redirect to the attendance admin page with the proper filter
+        return redirect(f'/admin/a_course_management/attendance/?section__id__exact={section.id}&session={session_value}')
 
 
     search_fields = [
@@ -501,7 +501,7 @@ class SectionStudentAdmin(AdminPermissionMixin, admin.ModelAdmin):
     get_score.short_description = 'نمره کل' 
 
 @admin.register(Course)
-class CourseAdmin(admin.ModelAdmin):
+class CourseAdmin(AdminPermissionMixin, admin.ModelAdmin):
 
     list_display= [
         'title',
@@ -531,7 +531,8 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(Degree)
 class DegreeAdmin(admin.ModelAdmin):
-    pass
+    autocomplete_fields = ('student',)
+
 
 @admin.register(Exam)
 class ExamAdmin(admin.ModelAdmin):
@@ -623,5 +624,8 @@ class AttendanceAdmin(AdminPermissionMixin, admin.ModelAdmin):
         self.message_user(request, f'حضور برای دانشجو های انتخاب شده ثبت شد ')
     
     mark_attendance_present.short_description = 'ثبت حضور'
+
+
+
 
 

@@ -796,3 +796,15 @@ ul, ol {
     height: 180px;
     object-fit: cover;
 }
+
+.balance{
+  width: 250px;
+  height: 70px;
+  margin: 20px;
+  background-color: var(--secondary);
+  box-shadow: 0 15px 25px rgba(0,0,0,.6);
+  border-radius: 25px;
+  position: fixed;
+  top: 0;
+  left: 0;
+}

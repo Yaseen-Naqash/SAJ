@@ -19,13 +19,14 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
 from a_user_management.views import send_code
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-
 
     path('authentication/', include('a_user_management.urls')),
     path('courses/', include('a_course_management.urls')),
     path('', include('a_notification_management.urls')),
+    path('branch', include('a_institution_management.urls')),
 
 
     path('send-code/', send_code, name='send_code'),

@@ -2,7 +2,7 @@ from django.db import models
 import jdatetime # type: ignore
 from a_user_management.models import Teacher, Student
 from decimal import Decimal
-
+from a_institution_management.models import Branch
 from django.core.exceptions import ValidationError
 # Create your models here.
 
@@ -17,10 +17,10 @@ class Course(models.Model):
         ('1','دارد'),
     ]
 
-
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, related_name='courses')
     title = models.CharField(max_length=255, null=True, verbose_name='نام دوره')
     prerequisites = models.ManyToManyField('Course', related_name='required_for',blank=True, verbose_name='پیشنیاز ها') # math101.required_for.all()  # Returns [math102]
-    course_img = models.ImageField(upload_to='Course_images/', null=True, verbose_name='تصویر دوره')
+    course_img = models.ImageField(upload_to='Course_images/',blank=True, null=True, verbose_name='تصویر دوره')
     price = models.CharField(max_length=127, null=True, verbose_name='قیمت ثبت نام به تومان')
     installment = models.CharField(default=0,max_length=1,choices=INSTALLMENT, null=True, blank=True, verbose_name='اقساط')
     courseDuration = models.CharField(max_length=63, null=True , blank=True, verbose_name='تعداد جلسات دوره')
@@ -43,6 +43,11 @@ class Section(models.Model):
         ('1','در حال ثبت نام'),
         
     ]
+    METHOD = [
+        ('0','حضوری'),
+        ('1','آنلاین'),
+        
+    ]
 
     GENDER = [
         ('0','دخنر'),
@@ -54,9 +59,9 @@ class Section(models.Model):
     course = models.ForeignKey(Course, on_delete=models.SET_NULL, related_name='sections', null=True, blank=True, verbose_name='دوره')
     teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, related_name='sections', null=True, blank=True, verbose_name='استاد')
     students = models.ManyToManyField(Student, through='SectionStudent', related_name='sections', verbose_name='دانشجو ها')
-    online_section = models.BooleanField(default=False, verbose_name='برگزاری آنلاین')
+    method = models.CharField(max_length=1, default=0,choices=METHOD, verbose_name='نحوه برگزاری')
     capacity = models.IntegerField(null=True, blank=True, default=1, verbose_name='ظرفیت')
-    section_status = models.CharField(default=1,max_length=1,choices=TYPE, verbose_name='وضعیت')
+    section_status = models.CharField(default=1, max_length=1, choices=TYPE, verbose_name='وضعیت')
     session_number = models.IntegerField(null=True, blank=True, default=0, verbose_name=' تعداد جلسات برگزار شده ')
     gender = models.CharField(max_length=1, null=True, blank=True, choices=GENDER, verbose_name="جنسیت")
 
@@ -242,6 +247,8 @@ class ExamDocument(models.Model):
 class Degree(models.Model):
     course = models.ForeignKey(Course, on_delete=models.SET_NULL, related_name='degrees', null=True, blank=True)
     student = models.ForeignKey(Student, on_delete=models.SET_NULL, related_name='degrees', null=True, blank=True)
+    teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, related_name='degrees', null=True, blank=True, verbose_name='استاد')
+
     pdf = models.FileField(upload_to='Degrees/', verbose_name='فایل پیوست مدرک', null=True , blank=True)  # 'documents/pdfs/' is the upload path
     score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True) 
@@ -259,3 +266,7 @@ class Degree(models.Model):
 
     def __str__(self):
         return f' مدرک : {self.course.title} برای {self.student}'
+    
+
+
+

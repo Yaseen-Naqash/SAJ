@@ -17,15 +17,15 @@ Aphome | مدارک من
 
     {% for degree in degrees %}
     <div class="my-course" style="height: fit-content;">
-        {% if section.course.course_img %}
-        <img src="{{ section.course.course_img.url }}" alt="{{ section.course.title }}">
+        {% if degree.course.course_img %}
+        <img src="{{ degree.course.course_img.url }}" alt="{{ degree.course.title }}">
         {% else %}
-        <img src="{% static 'default_course_image.jpg' %}" alt="{{ section.course.title }}">
+        <img src="{% static 'default_course_image.jpg' %}" alt="{{ degree.course.title }}">
         {% endif %}
 
-        <h1>{{ section.course.title }}</h1>
+        <h1>{{ degree.course.title }}</h1>
         _________________________
-        <p style="padding-top: 10px">{{ section.teacher.first_name }} {{ section.teacher.last_name }} | {{ section.name }}</p>
+        <p style="padding-top: 10px">{{ degree.teacher.first_name }} {{ degree.teacher.last_name }} | {{ section.name }}</p>
         
         _________________________
         <h5 style="padding: 10px;">زمان کلاس ها</h5>
@@ -34,8 +34,8 @@ Aphome | مدارک من
         {% endfor %}
 
         _________________________
-        <h5 style="padding: 10px;">تاریخ امتحان</h5>
-        <p>{{ section.exam.first.exam_time|date:"Y/m/d ساعت H:i"  }}</p>
+        <h5 style="padding: 10px;">تاریخ دوره</h5>
+        <p>{{ degree.exam.first.exam_time|date:"Y/m/d ساعت H:i"  }}</p>
 
 
         _________________________

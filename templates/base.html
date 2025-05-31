@@ -76,7 +76,7 @@
               </li> -->
 
               <li class="navbar-item flexbox-left">
-                <a class="navbar-item-inner flexbox-left">
+                <a href="{% url 'my_degrees_url' %}" class="navbar-item-inner flexbox-left">
                   <div class="navbar-item-inner-icon-wrapper flexbox">
                     <img class="icon" src="{% static 'media/icons/a-.png' %}" alt="">
                   </div>
@@ -84,7 +84,7 @@
                 </a>
               </li>
               <li class="navbar-item flexbox-left">
-                <a class="navbar-item-inner flexbox-left">
+                <a href="{% url 'my_financial_url' %}" class="navbar-item-inner flexbox-left">
                   <div class="navbar-item-inner-icon-wrapper flexbox">
                     <img class="icon" src="{% static 'media/icons/money-transfer.png' %}" style="scale: 1.2;" alt="">
                   </div>
@@ -117,11 +117,8 @@
         
         {% block content %}
         <div class="box">
-          <h1>پیشرفت فعلی</h1>
-          <a href="{% url 'student_login_url' %}">ورود دانشجو</a>
-          <a href="{% url 'teacher_login_url' %}">ورود استاد</a>
-          <a href="{% url 'register_url' %}">ثبت نام</a>
-          <a href="{% url 'logout_url' %}">خروج</a>
+          <h1>خطا</h1>
+
 
         </div>
         {% endblock %}

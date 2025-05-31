@@ -1,0 +1,57 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <script>
+    function handleDropdownChange(select) {
+      const value = select.value;
+      fetch("{% url 'set_dropdown_value' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: JSON.stringify({ value: value })
+      }).then(() => {
+        location.reload(); // Reload the page
+      });
+
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+    }
+  </script>
+{% endblock %}
+
+{% block branding %}
+  {{ block.super }}
+  
+{% load custom_tags %}
+
+{% if request.user|in_groups:"مالک,استاد" or request.user.is_superuser %}
+
+<select name="branch" onchange="handleDropdownChange(this)" style="margin-left: 20px;">
+  <option value="">انتخاب شعبه</option>
+  {% for branch in branches %}
+    <option value="{{ branch.id }}" {% if request.session.branch|stringformat:"s" == branch.id|stringformat:"s" %}selected{% endif %}>
+      {{ branch.name }}
+    </option>
+  {% endfor %}
+</select>
+
+{% endif %}
+
+
+{% endblock %}

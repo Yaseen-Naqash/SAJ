@@ -2,6 +2,7 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from a_user_management.models import Student, PhoneVerification, Teacher, Grade
+from a_course_management.models import Degree
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -32,13 +33,11 @@ def calculate_age(birth_day_date):
 
     return age
 
-
-
 def logout_command(request):
 
     
     logout(request)
-    return redirect('student_login_url')
+    return redirect('login_url')
 
 def login_view(request):
     if request.method == 'POST':
@@ -104,11 +103,10 @@ def register(request):
                 date_of_birth=birthDayDate_formatted,
                 education=education,
                 ageLevel = ageLevel,
-                grade = Grade.objects.get(gradeLevel=skillLevel),
             )
             messages.success(request, 'موفق : اکانت شما ساخته شد.')
 
-            return redirect('student_login_url')
+            return redirect('login_url')
         else:
             messages.error(request, 'کد تایید ارسال شده به تلفن شما معتبر نیست')
 
@@ -152,3 +150,9 @@ def send_code(request):
             return JsonResponse({'success': False, 'error': 'Invalid phone number'})
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+def my_degrees(request):
+    student = request.user.student
+    degrees = Degree.objects.filter(student = student)
+    context = {'degrees':degrees, }
+    return render(request,'my_degrees.html',context)

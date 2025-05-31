@@ -1,6 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
-from a_course_management.models import SectionStudent, HomeWork, HomeWorkDocument, Attendance, Section
+from a_course_management.models import SectionStudent, HomeWork, HomeWorkDocument, Attendance, Section, Course, SectionTimeSlot, Exam
+from a_financial_management.models import Receipt
+from a_notification_management.models import Notification, News
+from a_survey_management.models import Survey, Question, Answer, Choice
+from a_user_management.models import Student, Manager, Employee
 
 class AdminPermissionMixin(admin.ModelAdmin):
     hidden_fields_group_map = {
@@ -208,10 +212,74 @@ class AdminPermissionMixin(admin.ModelAdmin):
         return form
 
     def get_queryset(self, request):
+
+        qs = super().get_queryset(request)
+
+        user = request.user
+        branch_filter = request.session.get('branch', None)
+        # print('test')
+
+
+
+        if branch_filter:
+            # Apply branch-based filtering
+            if self.model == Course:
+                qs = qs.filter(branch__id=branch_filter)
+
+            elif self.model == Section:
+                qs = qs.filter(course__branch__id=branch_filter)
+
+            elif self.model == SectionStudent:
+                qs = qs.filter(section__course__branch__id=branch_filter)
+
+            elif self.model == SectionTimeSlot:
+                qs = qs.filter(section__course__branch__id=branch_filter)
+
+            elif self.model == Attendance:
+                qs = qs.filter(section__course__branch__id=branch_filter)
+
+            elif self.model == Exam:
+                qs = qs.filter(section__course__branch__id=branch_filter)
+
+            elif self.model == HomeWork:
+                qs = qs.filter(section__course__branch__id=branch_filter)
+
+            elif self.model == HomeWorkDocument:
+                qs = qs.filter(homeWork__section__course__branch__id=branch_filter)
+
+            elif self.model == Receipt:
+                qs = qs.filter(branch__id=branch_filter)
+
+            elif self.model == Notification:
+                qs = qs.filter(branch__id=branch_filter)
+
+            elif self.model == Notification:
+                qs = qs.filter(branch__id=branch_filter)
+
+            elif self.model == Survey:
+                qs = qs.filter(branch__id=branch_filter)
+
+            elif self.model == Question:
+                qs = qs.filter(survey__branch__id=branch_filter)
+
+            elif self.model == Choice:
+                qs = qs.filter(question__survey__branch__id=branch_filter)
+
+            elif self.model == Answer:
+                qs = qs.filter(question__survey__branch__id=branch_filter)
+
+            elif self.model == Student:
+                qs = qs.filter(branch__id=branch_filter)
+
+            elif self.model == Manager:
+                qs = qs.filter(branch__id=branch_filter)
+                
+            elif self.model == Employee:
+                qs = qs.filter(branch__id=branch_filter)
+
         """
         Filter the queryset based on the user's group and the current model.
         """
-        qs = super().get_queryset(request)
         if request.user.groups.filter(name='مالک').exists():
             # Apply custom queryset logic for group1
             return qs
