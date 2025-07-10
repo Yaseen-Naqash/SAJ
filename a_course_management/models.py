@@ -24,8 +24,8 @@ class Course(models.Model):
     price = models.CharField(max_length=127, null=True, verbose_name='قیمت ثبت نام به تومان')
     installment = models.CharField(default=0,max_length=1,choices=INSTALLMENT, null=True, blank=True, verbose_name='اقساط')
     courseDuration = models.CharField(max_length=63, null=True , blank=True, verbose_name='تعداد جلسات دوره')
-    session_length = models.CharField(max_length=63, null=True , blank=True, verbose_name='مدت زمان هر جلسه')
-    course_hours = models.IntegerField(default=10, null=True, verbose_name='تعداد ساعت دوره')
+    session_length = models.CharField(max_length=63, null=True , blank=True, verbose_name='مدت زمان هر جلسه (ساعت)')
+    course_hours = models.IntegerField(default=10, null=True, verbose_name='تعداد ساعت دوره (ساعت)')
     description = models.TextField(max_length=2047, null=True , blank=True, verbose_name='توضیحات')
     
     class Meta:
@@ -56,7 +56,7 @@ class Section(models.Model):
     ]
 
     name = models.CharField(max_length=63, null=True, blank=True, verbose_name='گروه') #or section number
-    course = models.ForeignKey(Course, on_delete=models.SET_NULL, related_name='sections', null=True, blank=True, verbose_name='دوره')
+    course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name='sections', null=True, blank=True, verbose_name='دوره')
     teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, related_name='sections', null=True, blank=True, verbose_name='استاد')
     students = models.ManyToManyField(Student, through='SectionStudent', related_name='sections', verbose_name='دانشجو ها')
     method = models.CharField(max_length=1, default=0,choices=METHOD, verbose_name='نحوه برگزاری')
@@ -64,18 +64,19 @@ class Section(models.Model):
     section_status = models.CharField(default=1, max_length=1, choices=TYPE, verbose_name='وضعیت')
     session_number = models.IntegerField(null=True, blank=True, default=0, verbose_name=' تعداد جلسات برگزار شده ')
     gender = models.CharField(max_length=1, null=True, blank=True, choices=GENDER, verbose_name="جنسیت")
+    start_date = models.DateField(verbose_name='تاریخ شروع', null=True)
 
 
     @property
-    def registered(self):
+    def registered(self):   
         return self.section_students.filter(activity='0').count()
 
     class Meta:
         verbose_name = "گروه"
         verbose_name_plural = "3- گروه ها" 
 
-    def __str__(self):
-        return f'{self.course.title} - {self.teacher} | {self.name}'
+    # def __str__(self):
+    #     return f'{self.course.title} - {self.teacher} | {self.name}'
     
 #  THIS IS A INTERMEDIATE CLASS FOR SHOWING STUDENT IN ADMIN PANEL OF SECTION, I COUDNT SHOW THEM DIRECTLY
 #  I HAD TO USE  through='SectionStudent' AND THAT WAS ACHIVABLE WITH AN  Intermediary Model LIKE THIS

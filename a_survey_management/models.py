@@ -4,11 +4,6 @@ from a_institution_management.models import Branch
 # Create your models here.
 # SURVEY
 
-
-# Assuming these already exist
-
-
-
 # Survey system starts here
 class Survey(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='surveys')
@@ -17,6 +12,9 @@ class Survey(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, related_name='surveys')
 
+    class Meta:
+        verbose_name = "نظرسنجی" 
+        verbose_name_plural = "نظرسنجی ها"
 
     def __str__(self):
         return f"Survey: {self.title} for {self.section}"
@@ -38,6 +36,9 @@ class Question(models.Model):
     question_type = models.CharField(max_length=10, choices=QUESTION_TYPES)
     required = models.BooleanField(default=True)
 
+    class Meta:
+        verbose_name = "سوال" 
+        verbose_name_plural = "سوالات"
     def __str__(self):
         return f"{self.text} ({self.get_question_type_display()})"
 
@@ -45,7 +46,10 @@ class Question(models.Model):
 class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='choices')
     text = models.CharField(max_length=255)
-
+    
+    class Meta:
+        verbose_name = "گزینه" 
+        verbose_name_plural = "گزینه ها"
     def __str__(self):
         return self.text
 
@@ -59,6 +63,8 @@ class Answer(models.Model):
 
     class Meta:
         unique_together = ('section_student', 'question')
+        verbose_name = "پاسخ" 
+        verbose_name_plural = "پاسخ ها"    
 
     def __str__(self):
         return f"Answer by {self.section_student} to '{self.question.text}'"
@@ -91,7 +97,9 @@ class SurveyTemplate(models.Model):
                         text=t_c.text,
                     )
         return survey
-
+    class Meta:
+        verbose_name = "نظرسنجی آماده" 
+        verbose_name_plural = "نظرسنجی های آماده"
     def __str__(self):
         return f"Template: {self.title}"
 
@@ -111,7 +119,9 @@ class TemplateQuestion(models.Model):
     text = models.TextField()
     question_type = models.CharField(max_length=10, choices=QUESTION_TYPES)
     required = models.BooleanField(default=True)
-
+    class Meta:
+        verbose_name = "سوال آماده" 
+        verbose_name_plural = "سوالات آماده"
     def __str__(self):
         return self.text
 
@@ -120,5 +130,9 @@ class TemplateChoice(models.Model):
     template_question = models.ForeignKey(TemplateQuestion, on_delete=models.CASCADE, related_name='template_choices')
     text = models.CharField(max_length=255)
 
+
+    class Meta:
+        verbose_name = "گزینه آماده" 
+        verbose_name_plural = "گزینه های آماده"
     def __str__(self):
         return self.text

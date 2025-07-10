@@ -120,6 +120,9 @@ class Command(BaseCommand):
                 ageLevel=random.choice(Student.AGE_LEVEL)[0],
                 gender=gender,
             )
+            student.set_password('admin')
+            student.save()
+
         self.stdout.write(f"Created students: {count}")
 
     def create_managers(self, count=1):
@@ -138,6 +141,7 @@ class Command(BaseCommand):
                 date_of_birth=timezone.now().date() - timezone.timedelta(days=random.randint(6000, 20000)),
             )
             manager.set_password("admin")
+            manager.save()
         
 
     def create_employees(self, count=2):
@@ -175,6 +179,7 @@ class Command(BaseCommand):
                 date_of_birth=timezone.now().date() - timezone.timedelta(days=random.randint(6000, 20000)),
             )
             teacher.set_password("admin")
+            teacher.save()
 
 
 
@@ -306,7 +311,6 @@ class Command(BaseCommand):
                     name=f'گروه {i}',
                     course=course,
                     teacher=teacher,
-                    online_section=random.choice([True, False]),
                     capacity=random.randint(10, 30),  # Random capacity
                     section_status=random.choice(['0', '1']),  # Random status
                     gender=random.choice(['0', '1', '2']),  # Random gender

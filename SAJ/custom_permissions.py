@@ -5,6 +5,8 @@ from a_financial_management.models import Receipt
 from a_notification_management.models import Notification, News
 from a_survey_management.models import Survey, Question, Answer, Choice
 from a_user_management.models import Student, Manager, Employee
+from django.db.models import Q
+
 
 class AdminPermissionMixin(admin.ModelAdmin):
     hidden_fields_group_map = {
@@ -13,7 +15,6 @@ class AdminPermissionMixin(admin.ModelAdmin):
                 'is_superuser',
                 'groups',
                 'user_permissions',
-                'branch',
                 'grade',
 
             ],
@@ -24,7 +25,6 @@ class AdminPermissionMixin(admin.ModelAdmin):
                 'user_permissions',
                 'password',
                 'username',
-                'branch',
                 'date_joined',
             ],
             'manager': [
@@ -33,7 +33,6 @@ class AdminPermissionMixin(admin.ModelAdmin):
                 'user_permissions',
                 'password',
                 'username',
-                'branch',
                 'date_joined',
             ],
             'employee': [
@@ -42,7 +41,6 @@ class AdminPermissionMixin(admin.ModelAdmin):
                 'user_permissions',
                 'password',
                 'username',
-                'branch',
                 'date_joined',
             ],
         },
@@ -133,6 +131,7 @@ class AdminPermissionMixin(admin.ModelAdmin):
                 'branch',
                 'date_joined',
             ],
+
         },
 
         'استاد': {
@@ -156,6 +155,38 @@ class AdminPermissionMixin(admin.ModelAdmin):
     }
 
     readonly_fields_group_map = {
+        # 'مالک':{
+        #     'receipt': [
+        #         'branch',
+        #     ],
+        #     'course': [
+        #         'branch',
+        #     ],
+        #     'news': [
+        #         'branch',
+        #     ],
+        #     'notification': [
+        #         'branch',
+        #     ],
+        #     'survey': [
+        #         'branch',
+        #     ],
+
+        # },
+
+        'مدیر':{
+            'receipt': [
+                'branch',
+            ],
+        },
+
+        'کارمند':{
+            'receipt': [
+                'confirmed',
+                'branch',
+            ],
+        },
+
         'استاد': {
             'sectionstudent': [
                 'section',
@@ -166,8 +197,11 @@ class AdminPermissionMixin(admin.ModelAdmin):
                 'end_date',
                 'score',
                 ],
-            'teacher': ['phone'],
+            'teacher': [
+                'phone',
+            ],
         },
+
 
     }
 
@@ -269,7 +303,7 @@ class AdminPermissionMixin(admin.ModelAdmin):
                 qs = qs.filter(question__survey__branch__id=branch_filter)
 
             elif self.model == Student:
-                qs = qs.filter(branch__id=branch_filter)
+                qs = qs.filter(Q(branch__id=branch_filter) | Q(branch__id__isnull=True))
 
             elif self.model == Manager:
                 qs = qs.filter(branch__id=branch_filter)
@@ -319,3 +353,5 @@ class AdminPermissionMixin(admin.ModelAdmin):
                 return qs.filter(teacher=request.user)
 
         return qs
+
+

@@ -107,3 +107,7 @@ class SurveyTemplateAdmin(admin.ModelAdmin):
         })
 
 admin.site.register(SurveyTemplate, SurveyTemplateAdmin)
+
+@admin.register(TemplateChoice)
+class TemplateChoiceAdmin(admin.ModelAdmin):
+    pass

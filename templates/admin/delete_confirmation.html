@@ -1,0 +1,26 @@
+{% extends "admin/delete_confirmation.html" %}
+
+{% block content %}
+<div class="delete-confirmation">
+  <h2>تأیید حذف</h2>
+  <p>آیا از حذف "{{ object }}" مطمئن هستید؟</p>
+  
+  {% if related_objects %}
+  <div class="related-items-warning">
+    <h3>موارد مرتبط زیر نیز حذف خواهند شد:</h3>
+    <ul>
+      {% for related_obj in related_objects %}
+        <li>{{ related_obj|truncatewords:10 }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  
+  <form method="post">{% csrf_token %}
+    <div class="submit-row">
+      <input type="submit" value="حذف" class="default" name="_confirm_delete">
+      <a href="#" onclick="window.history.back(); return false;" class="button cancel-link">انصراف</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

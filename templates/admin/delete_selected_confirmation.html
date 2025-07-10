@@ -1,0 +1,66 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n %}
+{% load custom_tags %}
+{% block content %}
+<div class="delete-confirmation">
+  <h2>{% trans "تأیید حذف چندگانه" %}</h2>
+  
+  <p>{% blocktrans %}آیا از حذف {{ objects_name }} انتخاب شده مطمئن هستید؟{% endblocktrans %}</p>
+
+  {% if perms_lacking %}
+    <div class="alert alert-error">
+      <h3>{% trans "عدم دسترسی" %}</h3>
+      <p>{% blocktrans %}حذف این موارد به دلیل محدودیت‌های دسترسی ممکن نیست:{% endblocktrans %}</p>
+      <ul>
+        {% for obj in perms_lacking %}
+          <li>{{ obj }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% elif protected %}
+    <div class="alert alert-error">
+      <h3>{% trans "موارد حفاظت شده" %}</h3>
+      <p>{% blocktrans %}حذف این موارد به دلیل وابستگی‌های دیگر ممکن نیست:{% endblocktrans %}</p>
+      <ul>
+        {% for obj in protected %}
+          <li>{{ obj }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% else %}
+    <div class="related-items-warning">
+      <h3>{% trans "موارد زیر حذف خواهند شد:" %}</h3>
+      <ul>
+        {% for obj in deletable_objects %}
+          <li>
+              <ul>
+                {% for item in obj %}
+
+                {% if item|instIterable  %}
+
+                <li>
+                    {{item}}
+                </li>
+                {% endif %}
+
+                {% endfor %}
+              </ul>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <form method="post">{% csrf_token %}
+    <div>
+      {% for obj in queryset %}
+        <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}">
+      {% endfor %}
+      <input type="hidden" name="action" value="delete_selected">
+      <input type="hidden" name="post" value="yes">
+      <input type="submit" value="{% trans 'حذف' %}" class="default">
+      <a href="#" onclick="window.history.back(); return false;" class="button cancel-link">{% trans 'انصراف' %}</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
