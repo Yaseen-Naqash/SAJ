@@ -112,6 +112,7 @@ class StudentAdmin(AdminPermissionMixin, admin.ModelAdmin):
         'phone', 
         'latest_course_title',
         'formatted_balance',
+        'dept',
         'view_receipts_link',
     )
     readonly_fields = ('latest_course_title',)
@@ -126,13 +127,26 @@ class StudentAdmin(AdminPermissionMixin, admin.ModelAdmin):
         balance = obj.balance
         formatted = f"{abs(balance):,}"  # Add commas to the balance value remove = sign from value
         if balance > 0:
-            return format_html('<span style="color: #2cff05;">{}</span>', formatted)
+            return format_html('<span style="color: #199602;">{}</span>', formatted)
         elif balance < 0:
             return format_html('<span style="color: #ff2c2c;">{}</span>', formatted)
         else:
             return '0'  # No special color for zero balance
 
     formatted_balance.short_description = 'موجودی (تومان)'
+
+    def dept(self, obj):
+        # Format the balance with commas and color based on its value
+        amount = -obj.total_dept_from_courses
+        formatted = f"{abs(amount):,}"  # Add commas to the balance value remove = sign from value
+        if amount > 0:
+            return format_html('<span style="color: #2cff05;">{}</span>', formatted)
+        elif amount < 0:
+            return format_html('<span style="color: #ff2c2c;">{}</span>', formatted)
+        else:
+            return '0'  # No special color for zero balance
+
+    dept.short_description = 'بدهی (تومان)'
     
     def view_receipts_link(self, obj):
         url = reverse('admin:a_financial_management_receipt_changelist') + f'?payer__id__exact={obj.id}'

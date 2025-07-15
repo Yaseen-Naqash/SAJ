@@ -136,6 +136,11 @@ class SectionStudent(models.Model):
             ).exclude(id=self.id)  # Exclude the current instance if editing
             if existing.exists():
                 raise ValidationError(" دانشجو در این گروه اکنون با وضعیت 'در حال تحصیل' ثبت شده است.")
+            
+        # Check for student debt only when creating a new instance
+        if not self.id and (self.student.total_dept_from_courses > 0 or self.student.balance < 0):
+            raise ValidationError(" دانشجو بدهی تصفیه نشده دارد")
+
 
     def save(self, *args, **kwargs):
         """

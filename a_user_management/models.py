@@ -162,6 +162,19 @@ class Student(Person):
         if latest_section_student:
             return latest_section_student.section.course.title
         return "بدون دوره"
+    
+    @property
+    def total_dept_from_courses(self):
+        all_section_students = self.section_students.all()
+        total_dept = 0
+        for section_student in all_section_students:
+            total_dept += section_student.dept
+
+        return total_dept
+    
+    @property
+    def total_dept(self):
+        return -self.total_dept_from_courses + self.balance
 
     class Meta:
         verbose_name = "دانشجو"  # Singular name for admin
