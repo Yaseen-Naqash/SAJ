@@ -9,7 +9,6 @@ from django.core.exceptions import ValidationError
 
 
 
-
 class Course(models.Model):
 
     INSTALLMENT = [
@@ -21,7 +20,7 @@ class Course(models.Model):
     title = models.CharField(max_length=255, null=True, verbose_name='نام دوره')
     prerequisites = models.ManyToManyField('Course', related_name='required_for',blank=True, verbose_name='پیشنیاز ها') # math101.required_for.all()  # Returns [math102]
     course_img = models.ImageField(upload_to='Course_images/',blank=True, null=True, verbose_name='تصویر دوره')
-    price = models.CharField(max_length=127, null=True, verbose_name='قیمت ثبت نام به تومان')
+    price = models.IntegerField(default=0, null=True, verbose_name='(تومان)  قیمت')
     installment = models.CharField(default=0,max_length=1,choices=INSTALLMENT, null=True, blank=True, verbose_name='اقساط')
     courseDuration = models.CharField(max_length=63, null=True , blank=True, verbose_name='تعداد جلسات دوره')
     session_length = models.CharField(max_length=63, null=True , blank=True, verbose_name='مدت زمان هر جلسه (ساعت)')
@@ -56,7 +55,7 @@ class Section(models.Model):
     ]
 
     name = models.CharField(max_length=63, null=True, blank=True, verbose_name='گروه') #or section number
-    course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name='sections', null=True, blank=True, verbose_name='دوره')
+    course = models.ForeignKey(Course, on_delete=models.SET_NULL, related_name='sections', null=True, blank=True, verbose_name='دوره')
     teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, related_name='sections', null=True, blank=True, verbose_name='استاد')
     students = models.ManyToManyField(Student, through='SectionStudent', related_name='sections', verbose_name='دانشجو ها')
     method = models.CharField(max_length=1, default=0,choices=METHOD, verbose_name='نحوه برگزاری')
@@ -75,8 +74,8 @@ class Section(models.Model):
         verbose_name = "گروه"
         verbose_name_plural = "3- گروه ها" 
 
-    # def __str__(self):
-    #     return f'{self.course.title} - {self.teacher} | {self.name}'
+    def __str__(self):
+        return f'{self.course.title} - {self.teacher} | {self.name}'
     
 #  THIS IS A INTERMEDIATE CLASS FOR SHOWING STUDENT IN ADMIN PANEL OF SECTION, I COUDNT SHOW THEM DIRECTLY
 #  I HAD TO USE  through='SectionStudent' AND THAT WAS ACHIVABLE WITH AN  Intermediary Model LIKE THIS
@@ -84,6 +83,10 @@ class Section(models.Model):
 #  THAT HES BELONG TO LIKE HIS SCORE IN THAT SECTION
 
 class SectionStudent(models.Model):
+
+
+    
+
 
     ACTIVITY = [
         ('0','در حال تحصیل'),
@@ -102,6 +105,10 @@ class SectionStudent(models.Model):
     start_date = models.DateField(verbose_name='تاریخ شروع', null=True, blank=True)
     end_date = models.DateField(verbose_name='تاریخ پایان', null=True, blank=True)
     # you ask question about when this date should register
+
+    # financial informations
+    dept = models.IntegerField(blank=True, null=True, verbose_name='(تومان) مانده بدهی')
+
 
 
     @property
@@ -140,6 +147,16 @@ class SectionStudent(models.Model):
     def __str__(self):
         return f'{self.student} در {self.section}'
     
+
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+@receiver(pre_save, sender=SectionStudent)
+def update_dept(sender, instance, **kwargs):
+    if not instance.pk:  # Only for new instances (pk doesn't exist yet)
+        if instance.section and instance.section.course:
+            instance.dept = instance.section.course.price
+
+
 class SectionTimeSlot(models.Model):
 
     DAYS_OF_WEEK = [

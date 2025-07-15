@@ -14,6 +14,8 @@ class SectionStudentInline(admin.TabularInline):
     model = Section.students.through  
     extra = 0
     autocomplete_fields = ['section']
+    exclude  = ['start_date', 'end_date']  # Only these fields will be shown.
+
 
 class ReceiptInline(admin.TabularInline):
     model = Receipt

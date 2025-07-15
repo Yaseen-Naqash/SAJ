@@ -6,7 +6,7 @@ from a_institution_management.models import Branch
 
 # Survey system starts here
 class Survey(models.Model):
-    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='surveys')
+    section = models.ForeignKey(Section, on_delete=models.SET_NULL, null=True, related_name='surveys')
     title = models.CharField(max_length=255)
     is_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -31,7 +31,7 @@ class Question(models.Model):
         (SCALE, 'Scale (1-10)'),
     ]
 
-    survey = models.ForeignKey(Survey, on_delete=models.CASCADE, related_name='questions')
+    survey = models.ForeignKey(Survey, on_delete=models.SET_NULL,null=True, related_name='questions')
     text = models.TextField()
     question_type = models.CharField(max_length=10, choices=QUESTION_TYPES)
     required = models.BooleanField(default=True)
@@ -44,7 +44,7 @@ class Question(models.Model):
 
 
 class Choice(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='choices')
+    question = models.ForeignKey(Question, on_delete=models.SET_NULL, null=True, related_name='choices')
     text = models.CharField(max_length=255)
     
     class Meta:
@@ -55,8 +55,8 @@ class Choice(models.Model):
 
 
 class Answer(models.Model):
-    section_student = models.ForeignKey(SectionStudent, on_delete=models.CASCADE, related_name='answers')
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    section_student = models.ForeignKey(SectionStudent, on_delete=models.SET_NULL, null=True, related_name='answers')
+    question = models.ForeignKey(Question, on_delete=models.SET_NULL, null=True)
     selected_choice = models.ForeignKey(Choice, null=True, blank=True, on_delete=models.SET_NULL)
     numeric_answer = models.IntegerField(null=True, blank=True)
     text_answer = models.TextField(null=True, blank=True)  # 👈 added for text questions
@@ -115,7 +115,7 @@ class TemplateQuestion(models.Model):
         (SCALE, 'Scale (1-10)'),
     ]
 
-    survey_template = models.ForeignKey(SurveyTemplate, on_delete=models.CASCADE, related_name='template_questions')
+    survey_template = models.ForeignKey(SurveyTemplate, on_delete=models.SET_NULL, null=True, related_name='template_questions')
     text = models.TextField()
     question_type = models.CharField(max_length=10, choices=QUESTION_TYPES)
     required = models.BooleanField(default=True)
@@ -127,7 +127,7 @@ class TemplateQuestion(models.Model):
 
 
 class TemplateChoice(models.Model):
-    template_question = models.ForeignKey(TemplateQuestion, on_delete=models.CASCADE, related_name='template_choices')
+    template_question = models.ForeignKey(TemplateQuestion, on_delete=models.SET_NULL, null=True, related_name='template_choices')
     text = models.CharField(max_length=255)
 
 

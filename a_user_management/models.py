@@ -55,7 +55,7 @@ class Owner(Person):
     
 
 class Manager(Person):
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='manager', null=True, blank=True)
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, related_name='manager', null=True, blank=True)
 
     def save(self, *args, **kwargs):
          # Check if the password needs hashing
@@ -71,7 +71,7 @@ class Manager(Person):
         return f"مدیر {self.first_name} {self.last_name}"
 
 class Employee(Person):
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='employees', null=True, blank=True)
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, related_name='employees', null=True, blank=True)
 
     def save(self, *args, **kwargs):
          # Check if the password needs hashing
@@ -87,7 +87,7 @@ class Employee(Person):
         return f"کارمند {self.first_name} {self.last_name}"
     
 class Teacher(Person):
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='teachers', null=True, blank=True)
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, related_name='teachers', null=True, blank=True)
 
     def save(self, *args, **kwargs):
          # Check if the password needs hashing
@@ -147,8 +147,8 @@ class Student(Person):
 
     ]
     balance = models.IntegerField(default=0, null=True, verbose_name='(تومان) مبلغ')
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='students', null=True, blank=True, verbose_name="شعبه")
-    grade = models.ForeignKey(Grade,on_delete=models.CASCADE, related_name='students', null=True, blank=True, verbose_name="سطح")
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, related_name='students', null=True, blank=True, verbose_name="شعبه")
+    grade = models.ForeignKey(Grade,on_delete=models.SET_NULL, related_name='students', null=True, blank=True, verbose_name="سطح")
     activity = models.CharField(default=0,max_length=1,choices=ACTIVITY, verbose_name="وضعیت")
     education = models.CharField(max_length=1, null=True, choices=EDUCATION, verbose_name="تحصیلات")
     ageLevel = models.CharField(max_length=1, null=True, choices=AGE_LEVEL, verbose_name="رده سنی")

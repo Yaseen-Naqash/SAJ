@@ -628,4 +628,3 @@ class AttendanceAdmin(AdminPermissionMixin, admin.ModelAdmin):
 
 
 
-

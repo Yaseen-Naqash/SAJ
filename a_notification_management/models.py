@@ -10,7 +10,7 @@ class News(models.Model):
     news_img = models.ImageField(upload_to='News_images/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)  
     updated_at = models.DateTimeField(auto_now=True)   
-    author = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='news', null=True, blank=True)
+    author = models.ForeignKey(Person, on_delete=models.SET_NULL, related_name='news', null=True, blank=True)
     branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, related_name='news')
 
     class Meta:
@@ -25,8 +25,8 @@ class Notification(models.Model):
     description = models.TextField(max_length=4095, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)  
     updated_at = models.DateTimeField(auto_now=True)   
-    author = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='notification', null=True, blank=True)
-    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='notification', null=True, blank=True)
+    author = models.ForeignKey(Person, on_delete=models.SET_NULL, related_name='notification', null=True, blank=True)
+    section = models.ForeignKey(Section, on_delete=models.SET_NULL, related_name='notification', null=True, blank=True)
     branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, related_name='notifications')
 
     def __str__(self):
